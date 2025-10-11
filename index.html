@@ -360,18 +360,6 @@
         </div>
 
         <div class="earned-vacation-input">
-          <label for="earnedVacationInput">Earned Vacation Days:</label>
-          <input
-            type="number"
-            id="earnedVacationInput"
-            value="25"
-            min="0"
-            max="50"
-            onchange="updateEarnedVacation()"
-          />
-        </div>
-
-        <div class="earned-vacation-input">
           <label for="earnedSpecialVacationInput">Earned Special Days:</label>
           <input
             type="number"
@@ -446,7 +434,7 @@
       class VacationCalculator {
         constructor() {
           this.currentYear = 2025;
-          this.earnedVacationDays = 25;
+
           this.earnedSpecialVacationDays = 5;
           this.endDate = new Date(); // Default to today
           this.vacationDays = new Set();
@@ -478,7 +466,7 @@
         saveData() {
           const data = {
             currentYear: this.currentYear,
-            earnedVacationDays: this.earnedVacationDays,
+
             earnedSpecialVacationDays: this.earnedSpecialVacationDays,
             endDate: this.endDate.toISOString(),
             vacationDays: Array.from(this.vacationDays),
@@ -492,7 +480,7 @@
           if (savedData) {
             const data = JSON.parse(savedData);
             this.currentYear = data.currentYear || 2025;
-            this.earnedVacationDays = data.earnedVacationDays || 25;
+
             this.earnedSpecialVacationDays = this.earnedSpecialVacationDays =
               data.earnedSpecialVacationDays || 5;
             this.endDate = data.endDate ? new Date(data.endDate) : new Date();
@@ -501,8 +489,7 @@
 
             document.getElementById("currentYear").textContent =
               this.currentYear;
-            document.getElementById("earnedVacationInput").value =
-              this.earnedVacationDays;
+
             document.getElementById("earnedSpecialVacationInput").value =
               this.earnedSpecialVacationDays;
             document.getElementById("endDateInput").value = this.endDate
@@ -866,13 +853,6 @@
           this.saveData();
         }
 
-        updateEarnedVacation() {
-          const input = document.getElementById("earnedVacationInput");
-          this.earnedVacationDays = parseInt(input.value) || 25;
-          this.updateStats();
-          this.saveData();
-        }
-
         updateEarnedSpecialVacation() {
           const input = document.getElementById("earnedSpecialVacationInput");
           this.earnedSpecialVacationDays = parseInt(input.value) || 5;
@@ -905,10 +885,6 @@
 
       function changeYear(delta) {
         vacationCalculator.changeYear(delta);
-      }
-
-      function updateEarnedVacation() {
-        vacationCalculator.updateEarnedVacation();
       }
 
       function updateEarnedSpecialVacation() {
