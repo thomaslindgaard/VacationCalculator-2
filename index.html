@@ -54,6 +54,23 @@
         transition: transform 0.3s ease;
       }
 
+      .stat-card.negative {
+        background: linear-gradient(135deg, #ff4757 0%, #c44569 100%);
+        animation: pulse-red 2s infinite;
+      }
+
+      @keyframes pulse-red {
+        0% {
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        50% {
+          box-shadow: 0 8px 20px rgba(255, 71, 87, 0.4);
+        }
+        100% {
+          box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+      }
+
       .stat-card:hover {
         transform: translateY(-5px);
       }
@@ -817,10 +834,7 @@
           const usedVacation = this.vacationDays.size;
           const specialVacation = this.specialVacationDays.size;
           const earnedVacationUntilEndDate = this.calculateEarnedVacationDays();
-          const remainingDecimal = Math.max(
-            0,
-            earnedVacationUntilEndDate - usedVacation
-          );
+          const remainingDecimal = earnedVacationUntilEndDate - usedVacation;
           const remaining = Math.floor(remainingDecimal);
           const remainingSpecial = Math.max(
             0,
@@ -837,15 +851,33 @@
           document.getElementById("usedVacation").textContent = usedVacation;
           document.getElementById("specialVacation").textContent =
             specialVacation;
-          const remainingWhole = Math.floor(remainingDecimal);
-          const remainingDecPart = (remainingDecimal - remainingWhole)
-            .toFixed(2)
-            .substring(1);
-          document.getElementById(
-            "remainingVacation"
-          ).innerHTML = `${remainingWhole}<span class="value-decimal">${remainingDecPart}</span>`;
+          // Highlight remaining vacation card in red if negative
+          const remainingCard = document
+            .getElementById("remainingVacation")
+            .closest(".stat-card");
+          if (remainingDecimal < 0) {
+            remainingCard.classList.add("negative");
+          } else {
+            remainingCard.classList.remove("negative");
+          }
+
+          // Display remaining vacation as a simple float
+          document.getElementById("remainingVacation").textContent =
+            remainingDecimal.toFixed(2);
+          // Highlight remaining special vacation card in red if negative
+          const remainingSpecialDecimal =
+            this.earnedSpecialVacationDays - specialVacation;
+          const remainingSpecialCard = document
+            .getElementById("remainingSpecialVacation")
+            .closest(".stat-card");
+          if (remainingSpecialDecimal < 0) {
+            remainingSpecialCard.classList.add("negative");
+          } else {
+            remainingSpecialCard.classList.remove("negative");
+          }
+
           document.getElementById("remainingSpecialVacation").textContent =
-            remainingSpecial;
+            remainingSpecialDecimal;
         }
 
         changeYear(delta) {
