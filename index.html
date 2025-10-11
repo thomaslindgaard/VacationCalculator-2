@@ -793,6 +793,7 @@
           e.preventDefault();
 
           if (isWeekend) return; // Don't allow marking weekends
+          if (this.bankHolidays.has(dateString)) return; // Don't allow marking bank holidays
 
           if (this.vacationDays.has(dateString)) {
             this.vacationDays.delete(dateString);
@@ -810,6 +811,7 @@
           e.preventDefault();
 
           if (isWeekend) return; // Don't allow marking weekends
+          if (this.bankHolidays.has(dateString)) return; // Don't allow marking bank holidays
 
           if (this.specialVacationDays.has(dateString)) {
             this.specialVacationDays.delete(dateString);
