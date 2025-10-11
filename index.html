@@ -386,7 +386,7 @@
             "November",
             "December",
           ];
-          this.dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+          this.dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
           this.loadData();
           this.generateCalendar();
@@ -459,7 +459,9 @@
           const firstDay = new Date(this.currentYear, month, 1);
           const lastDay = new Date(this.currentYear, month + 1, 0);
           const startDate = new Date(firstDay);
-          startDate.setDate(startDate.getDate() - firstDay.getDay());
+          const dayOfWeek = firstDay.getDay();
+          const mondayOffset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+          startDate.setDate(startDate.getDate() - mondayOffset);
 
           for (let i = 0; i < 42; i++) {
             const currentDate = new Date(startDate);
