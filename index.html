@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vacation Calculator</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 30px;
+        font-size: 2.5em;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .stats-panel {
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        min-width: 200px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-5px);
+      }
+
+      .stat-card h3 {
+        font-size: 1.2em;
+        margin-bottom: 10px;
+        opacity: 0.9;
+      }
+
+      .stat-card .value {
+        font-size: 2.5em;
+        font-weight: bold;
+      }
+
+      .controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 30px;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+
+      .year-selector {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .year-btn {
+        background: #667eea;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1.2em;
+        transition: background 0.3s ease;
+      }
+
+      .year-btn:hover {
+        background: #764ba2;
+      }
+
+      .current-year {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #333;
+        min-width: 80px;
+        text-align: center;
+      }
+
+      .earned-vacation-input {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .earned-vacation-input label {
+        font-weight: bold;
+        color: #333;
+      }
+
+      .earned-vacation-input input {
+        padding: 8px 12px;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        font-size: 1em;
+        width: 80px;
+      }
+
+      .legend {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: bold;
+      }
+
+      .legend-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 3px;
+        border: 2px solid #333;
+      }
+
+      .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-top: 20px;
+      }
+
+      .month {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+      }
+
+      .month:hover {
+        transform: translateY(-2px);
+      }
+
+      .month-header {
+        text-align: center;
+        font-size: 1.3em;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #eee;
+      }
+
+      .days-header {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 2px;
+        margin-bottom: 10px;
+      }
+
+      .day-header {
+        text-align: center;
+        font-weight: bold;
+        color: #666;
+        padding: 8px 4px;
+        font-size: 0.9em;
+      }
+
+      .days-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 2px;
+      }
+
+      .day {
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 0.9em;
+        transition: all 0.2s ease;
+        border: 2px solid transparent;
+      }
+
+      .day:hover {
+        transform: scale(1.1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .day.other-month {
+        color: #ccc;
+        cursor: default;
+      }
+
+      .day.other-month:hover {
+        transform: none;
+        box-shadow: none;
+      }
+
+      .day.weekend {
+        background-color: #f0f0f0;
+        color: #888;
+      }
+
+      .day.vacation {
+        background-color: #ff6b6b;
+        color: white;
+      }
+
+      .day.special-vacation {
+        background-color: #4ecdc4;
+        color: white;
+      }
+
+      .day.today {
+        border: 2px solid #667eea;
+        font-weight: bold;
+      }
+
+      .instructions {
+        text-align: center;
+        margin-top: 20px;
+        color: #666;
+        font-style: italic;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 15px;
+        }
+
+        h1 {
+          font-size: 2em;
+        }
+
+        .calendar-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .stats-panel {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .controls {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🏖️ Vacation Calculator</h1>
+
+      <div class="stats-panel">
+        <div class="stat-card">
+          <h3>Earned Vacation</h3>
+          <div class="value" id="earnedVacation">25</div>
+        </div>
+        <div class="stat-card">
+          <h3>Used Vacation</h3>
+          <div class="value" id="usedVacation">0</div>
+        </div>
+        <div class="stat-card">
+          <h3>Special Vacation</h3>
+          <div class="value" id="specialVacation">0</div>
+        </div>
+        <div class="stat-card">
+          <h3>Remaining</h3>
+          <div class="value" id="remainingVacation">25</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="year-selector">
+          <button class="year-btn" onclick="changeYear(-1)">◀</button>
+          <span class="current-year" id="currentYear">2025</span>
+          <button class="year-btn" onclick="changeYear(1)">▶</button>
+        </div>
+
+        <div class="earned-vacation-input">
+          <label for="earnedVacationInput">Earned Vacation Days:</label>
+          <input
+            type="number"
+            id="earnedVacationInput"
+            value="25"
+            min="0"
+            max="50"
+            onchange="updateEarnedVacation()"
+          />
+        </div>
+      </div>
+
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-color" style="background-color: #ff6b6b"></div>
+          <span>Vacation Day</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background-color: #4ecdc4"></div>
+          <span>Special Vacation (Feriefridage)</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background-color: #f0f0f0"></div>
+          <span>Weekend</span>
+        </div>
+      </div>
+
+      <div class="calendar-grid" id="calendarGrid">
+        <!-- Calendar months will be generated here -->
+      </div>
+
+      <div class="instructions">
+        <p>
+          <strong>Instructions:</strong> Left-click to mark vacation days,
+          Right-click to mark special vacation days (feriefridage), Click again
+          to remove marking. Weekends don't count as vacation days.
+        </p>
+      </div>
+    </div>
+
+    <script>
+      class VacationCalculator {
+        constructor() {
+          this.currentYear = 2025;
+          this.earnedVacationDays = 25;
+          this.vacationDays = new Set();
+          this.specialVacationDays = new Set();
+          this.monthNames = [
+            "January",
+            "February",
+            "March",
+            "April",
+            "May",
+            "June",
+            "July",
+            "August",
+            "September",
+            "October",
+            "November",
+            "December",
+          ];
+          this.dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+          this.loadData();
+          this.generateCalendar();
+          this.updateStats();
+        }
+
+        saveData() {
+          const data = {
+            currentYear: this.currentYear,
+            earnedVacationDays: this.earnedVacationDays,
+            vacationDays: Array.from(this.vacationDays),
+            specialVacationDays: Array.from(this.specialVacationDays),
+          };
+          localStorage.setItem("vacationCalculatorData", JSON.stringify(data));
+        }
+
+        loadData() {
+          const savedData = localStorage.getItem("vacationCalculatorData");
+          if (savedData) {
+            const data = JSON.parse(savedData);
+            this.currentYear = data.currentYear || 2025;
+            this.earnedVacationDays = data.earnedVacationDays || 25;
+            this.vacationDays = new Set(data.vacationDays || []);
+            this.specialVacationDays = new Set(data.specialVacationDays || []);
+
+            document.getElementById("currentYear").textContent =
+              this.currentYear;
+            document.getElementById("earnedVacationInput").value =
+              this.earnedVacationDays;
+          }
+        }
+
+        generateCalendar() {
+          const calendarGrid = document.getElementById("calendarGrid");
+          calendarGrid.innerHTML = "";
+
+          for (let month = 0; month < 12; month++) {
+            const monthElement = this.createMonthElement(month);
+            calendarGrid.appendChild(monthElement);
+          }
+        }
+
+        createMonthElement(month) {
+          const monthDiv = document.createElement("div");
+          monthDiv.className = "month";
+
+          const monthHeader = document.createElement("div");
+          monthHeader.className = "month-header";
+          monthHeader.textContent = this.monthNames[month];
+          monthDiv.appendChild(monthHeader);
+
+          const daysHeader = document.createElement("div");
+          daysHeader.className = "days-header";
+          this.dayNames.forEach((dayName) => {
+            const dayHeader = document.createElement("div");
+            dayHeader.className = "day-header";
+            dayHeader.textContent = dayName;
+            daysHeader.appendChild(dayHeader);
+          });
+          monthDiv.appendChild(daysHeader);
+
+          const daysGrid = document.createElement("div");
+          daysGrid.className = "days-grid";
+
+          const firstDay = new Date(this.currentYear, month, 1);
+          const lastDay = new Date(this.currentYear, month + 1, 0);
+          const startDate = new Date(firstDay);
+          startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+          for (let i = 0; i < 42; i++) {
+            const currentDate = new Date(startDate);
+            currentDate.setDate(startDate.getDate() + i);
+
+            const dayElement = this.createDayElement(currentDate, month);
+            daysGrid.appendChild(dayElement);
+          }
+
+          monthDiv.appendChild(daysGrid);
+          return monthDiv;
+        }
+
+        createDayElement(date, currentMonth) {
+          const dayDiv = document.createElement("div");
+          dayDiv.className = "day";
+          dayDiv.textContent = date.getDate();
+
+          const dateString = this.dateToString(date);
+          const isCurrentMonth = date.getMonth() === currentMonth;
+          const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+          const isToday = this.isToday(date);
+
+          if (!isCurrentMonth) {
+            dayDiv.classList.add("other-month");
+          } else {
+            if (isWeekend) {
+              dayDiv.classList.add("weekend");
+            }
+
+            if (this.vacationDays.has(dateString)) {
+              dayDiv.classList.add("vacation");
+            }
+
+            if (this.specialVacationDays.has(dateString)) {
+              dayDiv.classList.add("special-vacation");
+            }
+
+            if (isToday) {
+              dayDiv.classList.add("today");
+            }
+
+            dayDiv.addEventListener("click", (e) =>
+              this.handleDayClick(e, dateString, isWeekend)
+            );
+            dayDiv.addEventListener("contextmenu", (e) =>
+              this.handleDayRightClick(e, dateString, isWeekend)
+            );
+          }
+
+          return dayDiv;
+        }
+
+        handleDayClick(e, dateString, isWeekend) {
+          e.preventDefault();
+
+          if (isWeekend) return; // Don't allow marking weekends
+
+          if (this.vacationDays.has(dateString)) {
+            this.vacationDays.delete(dateString);
+          } else {
+            this.vacationDays.add(dateString);
+            this.specialVacationDays.delete(dateString); // Remove special vacation if exists
+          }
+
+          this.generateCalendar();
+          this.updateStats();
+          this.saveData();
+        }
+
+        handleDayRightClick(e, dateString, isWeekend) {
+          e.preventDefault();
+
+          if (isWeekend) return; // Don't allow marking weekends
+
+          if (this.specialVacationDays.has(dateString)) {
+            this.specialVacationDays.delete(dateString);
+          } else {
+            this.specialVacationDays.add(dateString);
+            this.vacationDays.delete(dateString); // Remove regular vacation if exists
+          }
+
+          this.generateCalendar();
+          this.updateStats();
+          this.saveData();
+        }
+
+        dateToString(date) {
+          return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
+            2,
+            "0"
+          )}-${String(date.getDate()).padStart(2, "0")}`;
+        }
+
+        isToday(date) {
+          const today = new Date();
+          return date.toDateString() === today.toDateString();
+        }
+
+        updateStats() {
+          const usedVacation = this.vacationDays.size;
+          const specialVacation = this.specialVacationDays.size;
+          const remaining = Math.max(0, this.earnedVacationDays - usedVacation);
+
+          document.getElementById("earnedVacation").textContent =
+            this.earnedVacationDays;
+          document.getElementById("usedVacation").textContent = usedVacation;
+          document.getElementById("specialVacation").textContent =
+            specialVacation;
+          document.getElementById("remainingVacation").textContent = remaining;
+        }
+
+        changeYear(delta) {
+          this.currentYear += delta;
+          document.getElementById("currentYear").textContent = this.currentYear;
+          this.generateCalendar();
+          this.saveData();
+        }
+
+        updateEarnedVacation() {
+          const input = document.getElementById("earnedVacationInput");
+          this.earnedVacationDays = parseInt(input.value) || 25;
+          this.updateStats();
+          this.saveData();
+        }
+      }
+
+      // Global functions for HTML event handlers
+      let vacationCalculator;
+
+      function changeYear(delta) {
+        vacationCalculator.changeYear(delta);
+      }
+
+      function updateEarnedVacation() {
+        vacationCalculator.updateEarnedVacation();
+      }
+
+      // Initialize the application
+      document.addEventListener("DOMContentLoaded", () => {
+        vacationCalculator = new VacationCalculator();
+      });
+
+      // Prevent right-click context menu on the calendar
+      document.addEventListener("contextmenu", (e) => {
+        if (e.target.classList.contains("day")) {
+          e.preventDefault();
+        }
+      });
+    </script>
+  </body>
+</html>
