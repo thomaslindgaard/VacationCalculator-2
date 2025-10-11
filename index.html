@@ -71,6 +71,55 @@
         }
       }
 
+      .periods-table {
+        background: white;
+        border-radius: 10px;
+        margin: 30px auto;
+        padding: 30px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        max-width: 1000px;
+      }
+
+      .periods-table h2 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 25px;
+        font-size: 1.5em;
+      }
+
+      .periods-table table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95em;
+        margin: 0 auto;
+      }
+
+      .periods-table th,
+      .periods-table td {
+        padding: 16px 20px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+      }
+
+      .periods-table th {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-weight: bold;
+      }
+
+      .periods-table tr:hover {
+        background-color: #f8f9fa;
+      }
+
+      .periods-table .number {
+        text-align: right;
+        font-weight: bold;
+      }
+
+      .periods-table .current-period {
+        background-color: #e3f2fd;
+      }
+
       .stat-card:hover {
         transform: translateY(-5px);
       }
@@ -367,6 +416,30 @@
           <h3>Remaining Special</h3>
           <div class="value" id="remainingSpecialVacation">5</div>
         </div>
+        <div class="stat-card">
+          <h3>Previous Period Remaining</h3>
+          <div class="value" id="previousPeriodVacation">0</div>
+        </div>
+        <div class="stat-card">
+          <h3>Previous Special Remaining</h3>
+          <div class="value" id="previousPeriodSpecial">0</div>
+        </div>
+      </div>
+
+      <div class="periods-table">
+        <h2>Vacation Periods & Calculations</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Metric</th>
+              <th>Previous Period</th>
+              <th>Current Period</th>
+            </tr>
+          </thead>
+          <tbody id="periodsTableBody">
+            <!-- Table rows will be generated here -->
+          </tbody>
+        </table>
       </div>
 
       <div class="controls">
@@ -563,21 +636,64 @@
             this.formatDateDisplay(this.endDate);
         }
 
+        getVacationPeriodYear(date) {
+          // Vacation period runs Sep 1 - Aug 31
+          // If date is Sep-Dec, it belongs to the period starting that year
+          // If date is Jan-Aug, it belongs to the period starting previous year
+          const month = date.getMonth(); // 0-based: 0=Jan, 8=Sep
+          if (month >= 8) {
+            // Sep-Dec (months 8-11)
+            return date.getFullYear();
+          } else {
+            // Jan-Aug (months 0-7)
+            return date.getFullYear() - 1;
+          }
+        }
+
         calculateEarnedVacationDays() {
           const originalEndDate = new Date(this.endDate);
-          let completeMonths;
+          const endDatePeriodYear = this.getVacationPeriodYear(originalEndDate);
 
-          // Handle different year scenarios
-          if (originalEndDate.getFullYear() < this.currentYear) {
-            return 0; // End date is before current year
-          } else if (originalEndDate.getFullYear() > this.currentYear) {
-            // End date is in following year - count all 12 months of current year
-            completeMonths = 12;
-          } else {
-            // End date is in current year
-            // Count complete months from January (month 0) to the start of the current month
-            // For example: if end date is in October (month 9), we count Jan through Sep (9 months)
-            completeMonths = originalEndDate.getMonth();
+          // We calculate for the current vacation period being viewed
+          const currentPeriodYear = this.currentYear;
+
+          if (endDatePeriodYear < currentPeriodYear) {
+            return 0; // End date is before current period
+          } else if (endDatePeriodYear > currentPeriodYear) {
+            // End date is in a future period - count full 12 months for current period
+            return 25;
+          }
+
+          // End date is within current period
+          // Calculate months from Sep 1 of period year to end date
+          const periodStart = new Date(currentPeriodYear, 8, 1); // Sep 1
+          const periodEnd = new Date(currentPeriodYear + 1, 7, 31); // Aug 31 next year
+
+          // Clamp end date to period boundaries
+          const clampedEndDate = new Date(
+            Math.min(originalEndDate.getTime(), periodEnd.getTime())
+          );
+
+          if (clampedEndDate < periodStart) {
+            return 0;
+          }
+
+          // Calculate complete months from Sep 1 to end date
+          let completeMonths = 0;
+          let currentDate = new Date(periodStart);
+
+          while (currentDate <= clampedEndDate) {
+            const nextMonth = new Date(
+              currentDate.getFullYear(),
+              currentDate.getMonth() + 1,
+              1
+            );
+            if (nextMonth <= clampedEndDate) {
+              completeMonths++;
+            } else {
+              break;
+            }
+            currentDate = nextMonth;
           }
 
           // Calculate earned vacation: 2.0833 days per complete month
@@ -591,6 +707,58 @@
           return Math.max(0, earnedVacation);
         }
 
+        calculatePreviousPeriodRemaining() {
+          const previousPeriodYear = this.currentYear - 1;
+
+          // Count ALL vacation days used from the previous period (regardless of when used)
+          const usedPreviousPeriodVacation = Array.from(
+            this.vacationDays
+          ).filter((dateString) => {
+            const date = new Date(dateString);
+            const datePeriodYear = this.getVacationPeriodYear(date);
+            return datePeriodYear === previousPeriodYear;
+          }).length;
+
+          const usedPreviousPeriodSpecial = Array.from(
+            this.specialVacationDays
+          ).filter((dateString) => {
+            const date = new Date(dateString);
+            const datePeriodYear = this.getVacationPeriodYear(date);
+            return datePeriodYear === previousPeriodYear;
+          }).length;
+
+          // Calculate earned vacation for previous period (assume full period)
+          const earnedPreviousPeriodVacation = 25; // Full year assumption
+          const earnedPreviousPeriodSpecial =
+            this.getSpecialVacationDaysForYear(previousPeriodYear);
+
+          // Calculate what's remaining from previous period
+          const remainingPreviousVacation = Math.max(
+            0,
+            earnedPreviousPeriodVacation - usedPreviousPeriodVacation
+          );
+          const remainingPreviousSpecial = Math.max(
+            0,
+            earnedPreviousPeriodSpecial - usedPreviousPeriodSpecial
+          );
+
+          // Check if we're still in the carryover window (previous period can be used until Dec 31 of current year)
+          const today = new Date();
+          const carryoverEnd = new Date(this.currentYear, 11, 31); // Dec 31 current year
+
+          // If we're past the carryover period, previous period days expire
+          if (today > carryoverEnd) {
+            return {
+              vacation: 0,
+              special: 0,
+            };
+          }
+
+          return {
+            vacation: remainingPreviousVacation,
+            special: remainingPreviousSpecial,
+          };
+        }
         calculateBankHolidays() {
           this.bankHolidays.clear();
 
@@ -847,19 +1015,131 @@
           return date.toDateString() === today.toDateString();
         }
 
+        updatePeriodsTable() {
+          const tableBody = document.getElementById("periodsTableBody");
+          tableBody.innerHTML = "";
+
+          const endDate = new Date(this.endDate);
+          const currentPeriodYear = this.getVacationPeriodYear(endDate);
+          const previousPeriodYear = currentPeriodYear - 1;
+
+          // Current period data
+          const currentEarned = this.calculateEarnedVacationDays();
+          const currentSpecialEarned =
+            this.getSpecialVacationDaysForYear(currentPeriodYear);
+
+          const currentUsed = Array.from(this.vacationDays).filter(
+            (dateString) => {
+              const date = new Date(dateString);
+              return this.getVacationPeriodYear(date) === currentPeriodYear;
+            }
+          ).length;
+
+          const currentSpecialUsed = Array.from(
+            this.specialVacationDays
+          ).filter((dateString) => {
+            const date = new Date(dateString);
+            return this.getVacationPeriodYear(date) === currentPeriodYear;
+          }).length;
+
+          // Previous period data
+          const previousRemaining = this.calculatePreviousPeriodRemaining();
+          const previousEarned = 25; // Assume full year
+          const previousSpecialEarned =
+            this.getSpecialVacationDaysForYear(previousPeriodYear);
+
+          const previousUsed = Array.from(this.vacationDays).filter(
+            (dateString) => {
+              const date = new Date(dateString);
+              return this.getVacationPeriodYear(date) === previousPeriodYear;
+            }
+          ).length;
+
+          const previousSpecialUsed = Array.from(
+            this.specialVacationDays
+          ).filter((dateString) => {
+            const date = new Date(dateString);
+            return this.getVacationPeriodYear(date) === previousPeriodYear;
+          }).length;
+
+          // Create rows with periods as columns
+          const rows = [
+            {
+              label: "Earning Period",
+              current: `Sep 1, ${currentPeriodYear} - Aug 31, ${
+                currentPeriodYear + 1
+              }`,
+              previous: `Sep 1, ${previousPeriodYear} - Aug 31, ${
+                previousPeriodYear + 1
+              }`,
+            },
+            {
+              label: "Usage Period",
+              current: `Sep 1, ${currentPeriodYear} - Dec 31, ${
+                currentPeriodYear + 1
+              }`,
+              previous: `Sep 1, ${previousPeriodYear} - Dec 31, ${
+                previousPeriodYear + 1
+              }`,
+            },
+            {
+              label: "Earned Vacation Days",
+              current: currentEarned.toFixed(2),
+              previous: previousEarned.toString(),
+            },
+            {
+              label: "Earned Special Days",
+              current: currentSpecialEarned.toString(),
+              previous: previousSpecialEarned.toString(),
+            },
+            {
+              label: "Used Vacation Days",
+              current: currentUsed.toString(),
+              previous: previousUsed.toString(),
+            },
+            {
+              label: "Used Special Days",
+              current: currentSpecialUsed.toString(),
+              previous: previousSpecialUsed.toString(),
+            },
+            {
+              label: "Remaining Vacation Days",
+              current: (currentEarned - currentUsed).toFixed(2),
+              previous: previousRemaining.vacation.toString(),
+            },
+            {
+              label: "Remaining Special Days",
+              current: (currentSpecialEarned - currentSpecialUsed).toString(),
+              previous: previousRemaining.special.toString(),
+            },
+          ];
+
+          rows.forEach((row) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td><strong>${row.label}</strong></td>
+              <td class="number">${row.previous}</td>
+              <td class="number current-period">${row.current}</td>
+            `;
+            tableBody.appendChild(tr);
+          });
+        }
+
         updateStats() {
-          // Count only vacation days from the current year
+          // Count only vacation days from the current vacation period
           const usedVacation = Array.from(this.vacationDays).filter(
             (dateString) => {
-              const year = parseInt(dateString.split("-")[0]);
-              return year === this.currentYear;
+              const date = new Date(dateString);
+              const datePeriodYear = this.getVacationPeriodYear(date);
+              return datePeriodYear === this.currentYear;
             }
           ).length;
 
           const specialVacation = Array.from(this.specialVacationDays).filter(
             (dateString) => {
-              const year = parseInt(dateString.split("-")[0]);
-              return year === this.currentYear;
+              const date = new Date(dateString);
+              const datePeriodYear = this.getVacationPeriodYear(date);
+              return datePeriodYear === this.currentYear;
             }
           ).length;
 
@@ -910,6 +1190,16 @@
 
           document.getElementById("remainingSpecialVacation").textContent =
             remainingSpecialDecimal;
+
+          // Calculate and display previous period remaining days
+          const previousRemaining = this.calculatePreviousPeriodRemaining();
+          document.getElementById("previousPeriodVacation").textContent =
+            previousRemaining.vacation;
+          document.getElementById("previousPeriodSpecial").textContent =
+            previousRemaining.special;
+
+          // Update periods table
+          this.updatePeriodsTable();
         }
 
         changeYear(delta) {
