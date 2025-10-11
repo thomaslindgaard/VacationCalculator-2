@@ -298,6 +298,10 @@
           <h3>Remaining</h3>
           <div class="value" id="remainingVacation">25</div>
         </div>
+        <div class="stat-card">
+          <h3>Remaining Special</h3>
+          <div class="value" id="remainingSpecialVacation">5</div>
+        </div>
       </div>
 
       <div class="controls">
@@ -316,6 +320,18 @@
             min="0"
             max="50"
             onchange="updateEarnedVacation()"
+          />
+        </div>
+
+        <div class="earned-vacation-input">
+          <label for="earnedSpecialVacationInput">Earned Special Days:</label>
+          <input
+            type="number"
+            id="earnedSpecialVacationInput"
+            value="5"
+            min="0"
+            max="20"
+            onchange="updateEarnedSpecialVacation()"
           />
         </div>
       </div>
@@ -353,6 +369,7 @@
         constructor() {
           this.currentYear = 2025;
           this.earnedVacationDays = 25;
+          this.earnedSpecialVacationDays = 5;
           this.vacationDays = new Set();
           this.specialVacationDays = new Set();
           this.monthNames = [
@@ -380,6 +397,7 @@
           const data = {
             currentYear: this.currentYear,
             earnedVacationDays: this.earnedVacationDays,
+            earnedSpecialVacationDays: this.earnedSpecialVacationDays,
             vacationDays: Array.from(this.vacationDays),
             specialVacationDays: Array.from(this.specialVacationDays),
           };
@@ -392,6 +410,8 @@
             const data = JSON.parse(savedData);
             this.currentYear = data.currentYear || 2025;
             this.earnedVacationDays = data.earnedVacationDays || 25;
+            this.earnedSpecialVacationDays =
+              data.earnedSpecialVacationDays || 5;
             this.vacationDays = new Set(data.vacationDays || []);
             this.specialVacationDays = new Set(data.specialVacationDays || []);
 
@@ -399,6 +419,8 @@
               this.currentYear;
             document.getElementById("earnedVacationInput").value =
               this.earnedVacationDays;
+            document.getElementById("earnedSpecialVacationInput").value =
+              this.earnedSpecialVacationDays;
           }
         }
 
@@ -541,6 +563,10 @@
           const usedVacation = this.vacationDays.size;
           const specialVacation = this.specialVacationDays.size;
           const remaining = Math.max(0, this.earnedVacationDays - usedVacation);
+          const remainingSpecial = Math.max(
+            0,
+            this.earnedSpecialVacationDays - specialVacation
+          );
 
           document.getElementById("earnedVacation").textContent =
             this.earnedVacationDays;
@@ -548,6 +574,8 @@
           document.getElementById("specialVacation").textContent =
             specialVacation;
           document.getElementById("remainingVacation").textContent = remaining;
+          document.getElementById("remainingSpecialVacation").textContent =
+            remainingSpecial;
         }
 
         changeYear(delta) {
@@ -563,6 +591,13 @@
           this.updateStats();
           this.saveData();
         }
+
+        updateEarnedSpecialVacation() {
+          const input = document.getElementById("earnedSpecialVacationInput");
+          this.earnedSpecialVacationDays = parseInt(input.value) || 5;
+          this.updateStats();
+          this.saveData();
+        }
       }
 
       // Global functions for HTML event handlers
@@ -574,6 +609,10 @@
 
       function updateEarnedVacation() {
         vacationCalculator.updateEarnedVacation();
+      }
+
+      function updateEarnedSpecialVacation() {
+        vacationCalculator.updateEarnedSpecialVacation();
       }
 
       // Initialize the application
