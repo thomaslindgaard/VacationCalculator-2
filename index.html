@@ -450,49 +450,61 @@
           // Danish public holidays (helligdage) with names
           const holidays = [
             // Fixed holidays
-            { date: new Date(this.currentYear, 0, 1), name: "Nytårsdag" },
+            {
+              date: new Date(this.currentYear, 0, 1),
+              name: "Nytårsdag / New Year's Day",
+            },
 
             // Easter-related holidays
             {
               date: this.getEasterDate(this.currentYear, -3),
-              name: "Skærtorsdag",
+              name: "Skærtorsdag / Maundy Thursday",
             },
             {
               date: this.getEasterDate(this.currentYear, -2),
-              name: "Langfredag",
+              name: "Langfredag / Good Friday",
             },
             {
               date: this.getEasterDate(this.currentYear, 0),
-              name: "Påskesøndag",
+              name: "Påskesøndag / Easter Sunday",
             },
             {
               date: this.getEasterDate(this.currentYear, 1),
-              name: "Anden påskedag",
+              name: "Anden påskedag / Easter Monday",
             },
 
             // Ascension Day - 39 days after Easter
             {
               date: this.getEasterDate(this.currentYear, 39),
-              name: "Kristi Himmelfartsdag",
+              name: "Kristi Himmelfartsdag / Ascension Day",
             },
 
             // Whitsun - 49 days after Easter
             {
               date: this.getEasterDate(this.currentYear, 49),
-              name: "Pinsedag",
+              name: "Pinsedag / Whit Sunday",
             },
             {
               date: this.getEasterDate(this.currentYear, 50),
-              name: "Anden pinsedag",
+              name: "Anden pinsedag / Whit Monday",
             },
 
             // Fixed summer/winter holidays
-            { date: new Date(this.currentYear, 11, 24), name: "Juleaftensdag" },
-            { date: new Date(this.currentYear, 11, 25), name: "Juledag" },
-            { date: new Date(this.currentYear, 11, 26), name: "Anden juledag" },
+            {
+              date: new Date(this.currentYear, 11, 24),
+              name: "Juleaftensdag / Christmas Eve",
+            },
+            {
+              date: new Date(this.currentYear, 11, 25),
+              name: "Juledag / Christmas Day",
+            },
+            {
+              date: new Date(this.currentYear, 11, 26),
+              name: "Anden juledag / Boxing Day",
+            },
             {
               date: new Date(this.currentYear, 11, 31),
-              name: "Nytårsaftensdag",
+              name: "Nytårsaftensdag / New Year's Eve",
             },
           ];
 
