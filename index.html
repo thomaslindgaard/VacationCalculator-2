@@ -348,6 +348,18 @@
             onchange="updateEarnedSpecialVacation()"
           />
         </div>
+
+        <div class="earned-vacation-input">
+          <label for="endDateInput">Calculate until:</label>
+          <input type="date" id="endDateInput" onchange="updateEndDate()" />
+          <button
+            class="year-btn"
+            onclick="resetEndDateToToday()"
+            title="Reset to today"
+          >
+            📅
+          </button>
+        </div>
       </div>
 
       <div class="legend">
@@ -388,6 +400,7 @@
           this.currentYear = 2025;
           this.earnedVacationDays = 25;
           this.earnedSpecialVacationDays = 5;
+          this.endDate = new Date(); // Default to today
           this.vacationDays = new Set();
           this.specialVacationDays = new Set();
           this.bankHolidays = new Map(); // Store date -> holiday name mapping
@@ -408,6 +421,7 @@
           this.dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
           this.loadData();
+          this.initializeEndDate();
           this.calculateBankHolidays();
           this.generateCalendar();
           this.updateStats();
@@ -418,6 +432,7 @@
             currentYear: this.currentYear,
             earnedVacationDays: this.earnedVacationDays,
             earnedSpecialVacationDays: this.earnedSpecialVacationDays,
+            endDate: this.endDate.toISOString(),
             vacationDays: Array.from(this.vacationDays),
             specialVacationDays: Array.from(this.specialVacationDays),
           };
@@ -430,8 +445,9 @@
             const data = JSON.parse(savedData);
             this.currentYear = data.currentYear || 2025;
             this.earnedVacationDays = data.earnedVacationDays || 25;
-            this.earnedSpecialVacationDays =
+            this.earnedSpecialVacationDays = this.earnedSpecialVacationDays =
               data.earnedSpecialVacationDays || 5;
+            this.endDate = data.endDate ? new Date(data.endDate) : new Date();
             this.vacationDays = new Set(data.vacationDays || []);
             this.specialVacationDays = new Set(data.specialVacationDays || []);
 
@@ -441,7 +457,46 @@
               this.earnedVacationDays;
             document.getElementById("earnedSpecialVacationInput").value =
               this.earnedSpecialVacationDays;
+            document.getElementById("endDateInput").value = this.endDate
+              .toISOString()
+              .split("T")[0];
           }
+        }
+
+        initializeEndDate() {
+          if (!document.getElementById("endDateInput").value) {
+            document.getElementById("endDateInput").value = this.endDate
+              .toISOString()
+              .split("T")[0];
+          }
+        }
+
+        calculateEarnedVacationDays() {
+          const startOfYear = new Date(this.currentYear, 0, 1);
+          const endDate = new Date(this.endDate);
+
+          // If end date is not in current year, use end of current year
+          if (endDate.getFullYear() !== this.currentYear) {
+            if (endDate.getFullYear() < this.currentYear) {
+              return 0; // End date is before current year
+            } else {
+              endDate.setFullYear(this.currentYear, 11, 31); // End of current year
+            }
+          }
+
+          // Calculate days from start of year to end date
+          const totalDaysInYear =
+            new Date(this.currentYear, 11, 31).getTime() -
+            startOfYear.getTime();
+          const daysUntilEndDate = endDate.getTime() - startOfYear.getTime();
+
+          // Calculate earned vacation proportionally
+          const proportionOfYear = daysUntilEndDate / totalDaysInYear;
+          const earnedVacation = Math.floor(
+            this.earnedVacationDays * proportionOfYear
+          );
+
+          return Math.max(0, earnedVacation);
         }
 
         calculateBankHolidays() {
@@ -701,14 +756,18 @@
         updateStats() {
           const usedVacation = this.vacationDays.size;
           const specialVacation = this.specialVacationDays.size;
-          const remaining = Math.max(0, this.earnedVacationDays - usedVacation);
+          const earnedVacationUntilEndDate = this.calculateEarnedVacationDays();
+          const remaining = Math.max(
+            0,
+            earnedVacationUntilEndDate - usedVacation
+          );
           const remainingSpecial = Math.max(
             0,
             this.earnedSpecialVacationDays - specialVacation
           );
 
           document.getElementById("earnedVacation").textContent =
-            this.earnedVacationDays;
+            earnedVacationUntilEndDate;
           document.getElementById("usedVacation").textContent = usedVacation;
           document.getElementById("specialVacation").textContent =
             specialVacation;
@@ -738,6 +797,23 @@
           this.updateStats();
           this.saveData();
         }
+
+        updateEndDate() {
+          const input = document.getElementById("endDateInput");
+          this.endDate = new Date(input.value);
+          this.updateStats();
+          this.saveData();
+        }
+
+        resetEndDateToToday() {
+          const today = new Date();
+          this.endDate = today;
+          document.getElementById("endDateInput").value = today
+            .toISOString()
+            .split("T")[0];
+          this.updateStats();
+          this.saveData();
+        }
       }
 
       // Global functions for HTML event handlers
@@ -753,6 +829,14 @@
 
       function updateEarnedSpecialVacation() {
         vacationCalculator.updateEarnedSpecialVacation();
+      }
+
+      function updateEndDate() {
+        vacationCalculator.updateEndDate();
+      }
+
+      function resetEndDateToToday() {
+        vacationCalculator.resetEndDateToToday();
       }
 
       // Initialize the application
