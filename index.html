@@ -455,7 +455,7 @@
         constructor() {
           this.currentYear = 2025;
 
-          this.earnedSpecialVacationDays = 5;
+          this.earnedSpecialVacationDaysByYear = {}; // Store special days per year
           this.endDate = new Date(); // Default to today
           this.vacationDays = new Set();
           this.specialVacationDays = new Set();
@@ -477,6 +477,7 @@
           this.dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
           this.loadData();
+          this.updateSpecialVacationInput(); // Ensure input shows correct year value
           this.initializeEndDate();
           this.calculateBankHolidays();
           this.generateCalendar();
@@ -487,7 +488,8 @@
           const data = {
             currentYear: this.currentYear,
 
-            earnedSpecialVacationDays: this.earnedSpecialVacationDays,
+            earnedSpecialVacationDaysByYear:
+              this.earnedSpecialVacationDaysByYear,
             endDate: this.endDate.toISOString(),
             vacationDays: Array.from(this.vacationDays),
             specialVacationDays: Array.from(this.specialVacationDays),
@@ -501,8 +503,8 @@
             const data = JSON.parse(savedData);
             this.currentYear = data.currentYear || 2025;
 
-            this.earnedSpecialVacationDays = this.earnedSpecialVacationDays =
-              data.earnedSpecialVacationDays || 5;
+            this.earnedSpecialVacationDaysByYear =
+              data.earnedSpecialVacationDaysByYear || {};
             this.endDate = data.endDate ? new Date(data.endDate) : new Date();
             this.vacationDays = new Set(data.vacationDays || []);
             this.specialVacationDays = new Set(data.specialVacationDays || []);
@@ -510,13 +512,21 @@
             document.getElementById("currentYear").textContent =
               this.currentYear;
 
-            document.getElementById("specialVacationInput").value =
-              this.earnedSpecialVacationDays;
+            this.updateSpecialVacationInput();
             document.getElementById("endDateInput").value = this.endDate
               .toISOString()
               .split("T")[0];
             this.updateDateDisplay();
           }
+        }
+
+        getSpecialVacationDaysForYear(year) {
+          return this.earnedSpecialVacationDaysByYear[year] || 5;
+        }
+
+        updateSpecialVacationInput() {
+          document.getElementById("specialVacationInput").value =
+            this.getSpecialVacationDaysForYear(this.currentYear);
         }
 
         initializeEndDate() {
@@ -838,14 +848,28 @@
         }
 
         updateStats() {
-          const usedVacation = this.vacationDays.size;
-          const specialVacation = this.specialVacationDays.size;
+          // Count only vacation days from the current year
+          const usedVacation = Array.from(this.vacationDays).filter(
+            (dateString) => {
+              const year = parseInt(dateString.split("-")[0]);
+              return year === this.currentYear;
+            }
+          ).length;
+
+          const specialVacation = Array.from(this.specialVacationDays).filter(
+            (dateString) => {
+              const year = parseInt(dateString.split("-")[0]);
+              return year === this.currentYear;
+            }
+          ).length;
+
           const earnedVacationUntilEndDate = this.calculateEarnedVacationDays();
           const remainingDecimal = earnedVacationUntilEndDate - usedVacation;
           const remaining = Math.floor(remainingDecimal);
           const remainingSpecial = Math.max(
             0,
-            this.earnedSpecialVacationDays - specialVacation
+            this.getSpecialVacationDaysForYear(this.currentYear) -
+              specialVacation
           );
 
           const wholeDays = Math.floor(earnedVacationUntilEndDate);
@@ -873,7 +897,8 @@
             remainingDecimal.toFixed(2);
           // Highlight remaining special vacation card in red if negative
           const remainingSpecialDecimal =
-            this.earnedSpecialVacationDays - specialVacation;
+            this.getSpecialVacationDaysForYear(this.currentYear) -
+            specialVacation;
           const remainingSpecialCard = document
             .getElementById("remainingSpecialVacation")
             .closest(".stat-card");
@@ -890,14 +915,17 @@
         changeYear(delta) {
           this.currentYear += delta;
           document.getElementById("currentYear").textContent = this.currentYear;
+          this.updateSpecialVacationInput(); // Update input for new year
           this.calculateBankHolidays();
           this.generateCalendar();
+          this.updateStats(); // Recalculate vacation statistics for new year
           this.saveData();
         }
 
         updateEarnedSpecialVacation() {
           const input = document.getElementById("specialVacationInput");
-          this.earnedSpecialVacationDays = parseInt(input.value) || 5;
+          const value = parseInt(input.value) || 5;
+          this.earnedSpecialVacationDaysByYear[this.currentYear] = value;
           this.updateStats();
           this.saveData();
         }
