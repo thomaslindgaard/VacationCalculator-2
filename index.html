@@ -360,14 +360,17 @@
         </div>
 
         <div class="earned-vacation-input">
-          <label for="earnedSpecialVacationInput">Earned Special Days:</label>
+          <label for="specialVacationInput" title="Feriefridage"
+            >Special Vacation Days:</label
+          >
           <input
             type="number"
-            id="earnedSpecialVacationInput"
+            id="specialVacationInput"
             value="5"
             min="0"
             max="20"
             onchange="updateEarnedSpecialVacation()"
+            title="Feriefridage"
           />
         </div>
 
@@ -490,7 +493,7 @@
             document.getElementById("currentYear").textContent =
               this.currentYear;
 
-            document.getElementById("earnedSpecialVacationInput").value =
+            document.getElementById("specialVacationInput").value =
               this.earnedSpecialVacationDays;
             document.getElementById("endDateInput").value = this.endDate
               .toISOString()
@@ -854,7 +857,7 @@
         }
 
         updateEarnedSpecialVacation() {
-          const input = document.getElementById("earnedSpecialVacationInput");
+          const input = document.getElementById("specialVacationInput");
           this.earnedSpecialVacationDays = parseInt(input.value) || 5;
           this.updateStats();
           this.saveData();
