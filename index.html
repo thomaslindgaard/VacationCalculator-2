@@ -77,7 +77,9 @@
         margin: 30px auto;
         padding: 30px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        max-width: 1000px;
+        max-width: 100%;
+        width: fit-content;
+        min-width: 1000px;
       }
 
       .periods-table h2 {
@@ -428,13 +430,9 @@
 
       <div class="periods-table">
         <h2>Vacation Periods & Calculations</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Metric</th>
-              <th>Previous Period</th>
-              <th>Current Period</th>
-            </tr>
+        <table id="periodsTable">
+          <thead id="periodsTableHead">
+            <!-- Table headers will be generated here -->
           </thead>
           <tbody id="periodsTableBody">
             <!-- Table rows will be generated here -->
@@ -1016,12 +1014,47 @@
         }
 
         updatePeriodsTable() {
+          const tableHead = document.getElementById("periodsTableHead");
           const tableBody = document.getElementById("periodsTableBody");
+          tableHead.innerHTML = "";
           tableBody.innerHTML = "";
 
           const endDate = new Date(this.endDate);
           const currentPeriodYear = this.getVacationPeriodYear(endDate);
           const previousPeriodYear = currentPeriodYear - 1;
+
+          // Create dynamic header with date spans
+          const headerRow1 = document.createElement("tr");
+          headerRow1.innerHTML = `
+            <th rowspan="2">Metric</th>
+            <th colspan="2" style="white-space: nowrap;" title="Earning Period: Sep 1, ${previousPeriodYear} - Aug 31, ${
+            previousPeriodYear + 1
+          }&#10;Usage Period: Sep 1, ${previousPeriodYear} - Dec 31, ${
+            previousPeriodYear + 1
+          }">Previous Period<br><small>Sep 1, ${previousPeriodYear} - Aug 31, ${
+            previousPeriodYear + 1
+          } (Dec 31, ${previousPeriodYear + 1})</small></th>
+            <th colspan="2" style="white-space: nowrap;" title="Earning Period: Sep 1, ${currentPeriodYear} - Aug 31, ${
+            currentPeriodYear + 1
+          }&#10;Usage Period: Sep 1, ${currentPeriodYear} - Dec 31, ${
+            currentPeriodYear + 1
+          }">Current Period<br><small>Sep 1, ${currentPeriodYear} - Aug 31, ${
+            currentPeriodYear + 1
+          } (Dec 31, ${currentPeriodYear + 1})</small></th>
+            <th rowspan="2">Total Remaining</th>
+            <th rowspan="2">Notes</th>
+          `;
+
+          const headerRow2 = document.createElement("tr");
+          headerRow2.innerHTML = `
+            <th>Earned</th>
+            <th>Used/Remaining</th>
+            <th>Earned</th>
+            <th>Used/Remaining</th>
+          `;
+
+          tableHead.appendChild(headerRow1);
+          tableHead.appendChild(headerRow2);
 
           // Current period data
           const currentEarned = this.calculateEarnedVacationDays();
@@ -1062,65 +1095,97 @@
             return this.getVacationPeriodYear(date) === previousPeriodYear;
           }).length;
 
-          // Create rows with periods as columns
+          // Calculate remaining amounts
+          const currentVacationRemaining = currentEarned - currentUsed;
+          const currentSpecialRemaining =
+            currentSpecialEarned - currentSpecialUsed;
+          const totalPreviousRemaining =
+            previousRemaining.vacation + previousRemaining.special;
+          const totalCurrentRemaining =
+            currentVacationRemaining + currentSpecialRemaining;
+
+          // Calculate warning messages
+          const vacationWarning =
+            previousRemaining.vacation > 5
+              ? `⚠️ Only 5 days from the previous period can be transferred to next year. Use ${
+                  previousRemaining.vacation - 5
+                } exceeding days before Dec 31, ${currentPeriodYear} to avoid losing them`
+              : "";
+
+          const totalSpecialDays =
+            previousRemaining.special + currentSpecialRemaining;
+          const specialWarning =
+            totalSpecialDays > 5
+              ? `⚠️ Special days cannot exceed 5 days by Dec 31. You must either use ${
+                  totalSpecialDays - 5
+                } exceeding days before Dec 31 or they will be paid out in January`
+              : "";
+
+          // Create rows with grouped earned/used columns (removed period rows)
           const rows = [
             {
-              label: "Earning Period",
-              current: `Sep 1, ${currentPeriodYear} - Aug 31, ${
-                currentPeriodYear + 1
-              }`,
-              previous: `Sep 1, ${previousPeriodYear} - Aug 31, ${
-                previousPeriodYear + 1
-              }`,
+              label: "Vacation Days",
+              previousEarned: previousEarned.toString(),
+              previousUsed: `${previousUsed} used (${previousRemaining.vacation} remaining)`,
+              currentEarned: currentEarned.toFixed(2),
+              currentUsed: `${currentUsed} used (${currentVacationRemaining.toFixed(
+                2
+              )} remaining)`,
+              totalRemaining: (
+                previousRemaining.vacation + currentVacationRemaining
+              ).toFixed(2),
+              notes: vacationWarning,
             },
             {
-              label: "Usage Period",
-              current: `Sep 1, ${currentPeriodYear} - Dec 31, ${
-                currentPeriodYear + 1
-              }`,
-              previous: `Sep 1, ${previousPeriodYear} - Dec 31, ${
-                previousPeriodYear + 1
-              }`,
+              label: "Special Days",
+              previousEarned: previousSpecialEarned.toString(),
+              previousUsed: `${previousSpecialUsed} used (${previousRemaining.special} remaining)`,
+              currentEarned: currentSpecialEarned.toString(),
+              currentUsed: `${currentSpecialUsed} used (${currentSpecialRemaining} remaining)`,
+              totalRemaining: (
+                previousRemaining.special + currentSpecialRemaining
+              ).toString(),
+              notes: specialWarning,
             },
             {
-              label: "Earned Vacation Days",
-              current: currentEarned.toFixed(2),
-              previous: previousEarned.toString(),
-            },
-            {
-              label: "Earned Special Days",
-              current: currentSpecialEarned.toString(),
-              previous: previousSpecialEarned.toString(),
-            },
-            {
-              label: "Used Vacation Days",
-              current: currentUsed.toString(),
-              previous: previousUsed.toString(),
-            },
-            {
-              label: "Used Special Days",
-              current: currentSpecialUsed.toString(),
-              previous: previousSpecialUsed.toString(),
-            },
-            {
-              label: "Remaining Vacation Days",
-              current: (currentEarned - currentUsed).toFixed(2),
-              previous: previousRemaining.vacation.toString(),
-            },
-            {
-              label: "Remaining Special Days",
-              current: (currentSpecialEarned - currentSpecialUsed).toString(),
-              previous: previousRemaining.special.toString(),
+              label: "Total Remaining",
+              previousEarned: "",
+              previousUsed: totalPreviousRemaining.toString(),
+              currentEarned: "",
+              currentUsed: totalCurrentRemaining.toFixed(2),
+              totalRemaining: (
+                totalPreviousRemaining + totalCurrentRemaining
+              ).toFixed(2),
+              notes: "",
+              isTotalRow: true,
             },
           ];
 
           rows.forEach((row) => {
             const tr = document.createElement("tr");
-            tr.innerHTML = `
-              <td><strong>${row.label}</strong></td>
-              <td class="number">${row.previous}</td>
-              <td class="number current-period">${row.current}</td>
-            `;
+            if (row.isTotalRow) {
+              tr.style.borderTop = "2px solid #333";
+              tr.style.fontWeight = "bold";
+              tr.innerHTML = `
+                <td><strong>${row.label}</strong></td>
+                <td class="number"></td>
+                <td class="number">${row.previousUsed}</td>
+                <td class="number current-period"></td>
+                <td class="number current-period">${row.currentUsed}</td>
+                <td class="number" style="background-color: #e8f4fd; font-weight: bold;">${row.totalRemaining}</td>
+                <td class="notes" style="font-size: 0.9em; color: #d9534f;">${row.notes}</td>
+              `;
+            } else {
+              tr.innerHTML = `
+                <td><strong>${row.label}</strong></td>
+                <td class="number">${row.previousEarned}</td>
+                <td class="number">${row.previousUsed}</td>
+                <td class="number current-period">${row.currentEarned}</td>
+                <td class="number current-period">${row.currentUsed}</td>
+                <td class="number">${row.totalRemaining}</td>
+                <td class="notes" style="font-size: 0.9em; color: #d9534f;">${row.notes}</td>
+              `;
+            }
             tableBody.appendChild(tr);
           });
         }
