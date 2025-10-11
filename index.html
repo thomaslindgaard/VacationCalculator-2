@@ -69,6 +69,12 @@
         font-weight: bold;
       }
 
+      .value-decimal {
+        font-size: 0.6em;
+        opacity: 0.8;
+        margin-left: 2px;
+      }
+
       .controls {
         display: flex;
         justify-content: center;
@@ -530,7 +536,9 @@
             "Nov",
             "Dec",
           ];
-          return `${months[date.getMonth()]} ${date.getDate()}`;
+          return `${
+            months[date.getMonth()]
+          } ${date.getDate()} ${date.getFullYear()}`;
         }
 
         updateDateDisplay() {
@@ -539,31 +547,26 @@
         }
 
         calculateEarnedVacationDays() {
-          const startOfYear = new Date(this.currentYear, 0, 1);
-          const endDate = new Date(this.endDate);
+          const originalEndDate = new Date(this.endDate);
+          let completeMonths;
 
-          // If end date is not in current year, use end of current year
-          if (endDate.getFullYear() !== this.currentYear) {
-            if (endDate.getFullYear() < this.currentYear) {
-              return 0; // End date is before current year
-            } else {
-              endDate.setFullYear(this.currentYear, 11, 31); // End of current year
-            }
+          // Handle different year scenarios
+          if (originalEndDate.getFullYear() < this.currentYear) {
+            return 0; // End date is before current year
+          } else if (originalEndDate.getFullYear() > this.currentYear) {
+            // End date is in following year - count all 12 months of current year
+            completeMonths = 12;
+          } else {
+            // End date is in current year
+            // Count complete months from January (month 0) to the start of the current month
+            // For example: if end date is in October (month 9), we count Jan through Sep (9 months)
+            completeMonths = originalEndDate.getMonth();
           }
 
-          // Calculate days from start of year to end date
-          const totalDaysInYear =
-            new Date(this.currentYear, 11, 31).getTime() -
-            startOfYear.getTime();
-          const daysUntilEndDate = endDate.getTime() - startOfYear.getTime();
+          // Calculate earned vacation: 2.08 days per complete month
+          const earnedVacation = completeMonths * 2.08;
 
-          // Calculate earned vacation proportionally
-          const proportionOfYear = daysUntilEndDate / totalDaysInYear;
-          const earnedVacation = Math.floor(
-            this.earnedVacationDays * proportionOfYear
-          );
-
-          return Math.max(0, earnedVacation);
+          return Math.max(0, Math.min(earnedVacation, 25)); // Cap at 25 days per year
         }
 
         calculateBankHolidays() {
@@ -824,21 +827,33 @@
           const usedVacation = this.vacationDays.size;
           const specialVacation = this.specialVacationDays.size;
           const earnedVacationUntilEndDate = this.calculateEarnedVacationDays();
-          const remaining = Math.max(
+          const remainingDecimal = Math.max(
             0,
             earnedVacationUntilEndDate - usedVacation
           );
+          const remaining = Math.floor(remainingDecimal);
           const remainingSpecial = Math.max(
             0,
             this.earnedSpecialVacationDays - specialVacation
           );
 
-          document.getElementById("earnedVacation").textContent =
-            earnedVacationUntilEndDate;
+          const wholeDays = Math.floor(earnedVacationUntilEndDate);
+          const decimalPart = (earnedVacationUntilEndDate - wholeDays)
+            .toFixed(2)
+            .substring(1);
+          document.getElementById(
+            "earnedVacation"
+          ).innerHTML = `${wholeDays}<span class="value-decimal">${decimalPart}</span>`;
           document.getElementById("usedVacation").textContent = usedVacation;
           document.getElementById("specialVacation").textContent =
             specialVacation;
-          document.getElementById("remainingVacation").textContent = remaining;
+          const remainingWhole = Math.floor(remainingDecimal);
+          const remainingDecPart = (remainingDecimal - remainingWhole)
+            .toFixed(2)
+            .substring(1);
+          document.getElementById(
+            "remainingVacation"
+          ).innerHTML = `${remainingWhole}<span class="value-decimal">${remainingDecPart}</span>`;
           document.getElementById("remainingSpecialVacation").textContent =
             remainingSpecial;
         }
