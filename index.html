@@ -570,10 +570,15 @@
             completeMonths = originalEndDate.getMonth();
           }
 
-          // Calculate earned vacation: 2.08 days per complete month
-          const earnedVacation = completeMonths * 2.08;
+          // Calculate earned vacation: 2.0833 days per complete month
+          let earnedVacation = completeMonths * 2.0833;
 
-          return Math.max(0, Math.min(earnedVacation, 25)); // Cap at 25 days per year
+          // Round up to exactly 25 days after 12 months
+          if (completeMonths >= 12) {
+            earnedVacation = 25;
+          }
+
+          return Math.max(0, earnedVacation);
         }
 
         calculateBankHolidays() {
