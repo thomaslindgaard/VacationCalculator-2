@@ -241,6 +241,20 @@
         color: white;
       }
 
+      .day.bank-holiday {
+        background-color: #ffa726;
+        color: white;
+        position: relative;
+      }
+
+      .day.bank-holiday::after {
+        content: "🏛️";
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        font-size: 0.7em;
+      }
+
       .day.today {
         border: 2px solid #667eea;
         font-weight: bold;
@@ -349,6 +363,10 @@
           <div class="legend-color" style="background-color: #f0f0f0"></div>
           <span>Weekend</span>
         </div>
+        <div class="legend-item">
+          <div class="legend-color" style="background-color: #ffa726"></div>
+          <span>Bank Holiday 🏛️</span>
+        </div>
       </div>
 
       <div class="calendar-grid" id="calendarGrid">
@@ -372,6 +390,7 @@
           this.earnedSpecialVacationDays = 5;
           this.vacationDays = new Set();
           this.specialVacationDays = new Set();
+          this.bankHolidays = new Map(); // Store date -> holiday name mapping
           this.monthNames = [
             "January",
             "February",
@@ -389,6 +408,7 @@
           this.dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
           this.loadData();
+          this.calculateBankHolidays();
           this.generateCalendar();
           this.updateStats();
         }
@@ -422,6 +442,106 @@
             document.getElementById("earnedSpecialVacationInput").value =
               this.earnedSpecialVacationDays;
           }
+        }
+
+        calculateBankHolidays() {
+          this.bankHolidays.clear();
+
+          // Danish public holidays (helligdage) with names
+          const holidays = [
+            // Fixed holidays
+            { date: new Date(this.currentYear, 0, 1), name: "Nytårsdag" },
+
+            // Easter-related holidays
+            {
+              date: this.getEasterDate(this.currentYear, -3),
+              name: "Skærtorsdag",
+            },
+            {
+              date: this.getEasterDate(this.currentYear, -2),
+              name: "Langfredag",
+            },
+            {
+              date: this.getEasterDate(this.currentYear, 0),
+              name: "Påskesøndag",
+            },
+            {
+              date: this.getEasterDate(this.currentYear, 1),
+              name: "Anden påskedag",
+            },
+
+            // Ascension Day - 39 days after Easter
+            {
+              date: this.getEasterDate(this.currentYear, 39),
+              name: "Kristi Himmelfartsdag",
+            },
+
+            // Whitsun - 49 days after Easter
+            {
+              date: this.getEasterDate(this.currentYear, 49),
+              name: "Pinsedag",
+            },
+            {
+              date: this.getEasterDate(this.currentYear, 50),
+              name: "Anden pinsedag",
+            },
+
+            // Fixed summer/winter holidays
+            { date: new Date(this.currentYear, 11, 24), name: "Juleaftensdag" },
+            { date: new Date(this.currentYear, 11, 25), name: "Juledag" },
+            { date: new Date(this.currentYear, 11, 26), name: "Anden juledag" },
+            {
+              date: new Date(this.currentYear, 11, 31),
+              name: "Nytårsaftensdag",
+            },
+          ];
+
+          holidays.forEach((holiday) => {
+            if (holiday.date) {
+              this.bankHolidays.set(
+                this.dateToString(holiday.date),
+                holiday.name
+              );
+            }
+          });
+        }
+
+        getEasterDate(year, offsetDays = 0) {
+          // Simplified Easter calculation (Western Christian)
+          const a = year % 19;
+          const b = Math.floor(year / 100);
+          const c = year % 100;
+          const d = Math.floor(b / 4);
+          const e = b % 4;
+          const f = Math.floor((b + 8) / 25);
+          const g = Math.floor((b - f + 1) / 3);
+          const h = (19 * a + b - d - g + 15) % 30;
+          const i = Math.floor(c / 4);
+          const k = c % 4;
+          const l = (32 + 2 * e + 2 * i - h - k) % 7;
+          const m = Math.floor((a + 11 * h + 22 * l) / 451);
+          const month = Math.floor((h + l - 7 * m + 114) / 31);
+          const day = ((h + l - 7 * m + 114) % 31) + 1;
+
+          const easter = new Date(year, month - 1, day);
+          if (offsetDays !== 0) {
+            easter.setDate(easter.getDate() + offsetDays);
+          }
+          return easter;
+        }
+
+        getNthWeekdayOfMonth(year, month, weekday, n) {
+          const firstDay = new Date(year, month, 1);
+          const firstWeekday = firstDay.getDay();
+          const daysToAdd = ((weekday - firstWeekday + 7) % 7) + (n - 1) * 7;
+          return new Date(year, month, 1 + daysToAdd);
+        }
+
+        getLastWeekdayOfMonth(year, month, weekday) {
+          const lastDay = new Date(year, month + 1, 0);
+          const lastWeekday = lastDay.getDay();
+          const daysToSubtract = (lastWeekday - weekday + 7) % 7;
+          return new Date(year, month + 1, 0 - daysToSubtract);
         }
 
         generateCalendar() {
@@ -498,6 +618,11 @@
 
             if (this.specialVacationDays.has(dateString)) {
               dayDiv.classList.add("special-vacation");
+            }
+
+            if (this.bankHolidays.has(dateString)) {
+              dayDiv.classList.add("bank-holiday");
+              dayDiv.title = this.bankHolidays.get(dateString); // Add tooltip with holiday name
             }
 
             if (isToday) {
@@ -583,6 +708,7 @@
         changeYear(delta) {
           this.currentYear += delta;
           document.getElementById("currentYear").textContent = this.currentYear;
+          this.calculateBankHolidays();
           this.generateCalendar();
           this.saveData();
         }
