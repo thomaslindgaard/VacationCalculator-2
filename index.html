@@ -137,6 +137,59 @@
         font-weight: bold;
       }
 
+      .card-content {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .stat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+      }
+
+      .stat-item:last-child {
+        border-bottom: none;
+      }
+
+      .stat-item .label {
+        font-size: 1.1em;
+        color: #666;
+        font-weight: 500;
+      }
+
+      .stat-item .value {
+        font-size: 1.8em;
+        font-weight: bold;
+        color: #2c3e50;
+        margin-top: 0;
+      }
+
+      .toggle-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 25px;
+        font-size: 1em;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .toggle-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+      }
+
+      .toggle-btn:active {
+        transform: translateY(0);
+      }
+
       .value-decimal {
         font-size: 0.6em;
         opacity: 0.8;
@@ -399,45 +452,36 @@
 
       <div class="stats-panel">
         <div class="stat-card">
-          <h3>Earned Vacation</h3>
-          <div class="value" id="earnedVacation">25</div>
+          <h3>Vacation Days Available</h3>
+          <div class="value" id="totalRemainingVacation">25</div>
         </div>
         <div class="stat-card">
-          <h3>Used Vacation</h3>
-          <div class="value" id="usedVacation">0</div>
-        </div>
-        <div class="stat-card">
-          <h3>Special Vacation</h3>
-          <div class="value" id="specialVacation">0</div>
-        </div>
-        <div class="stat-card">
-          <h3>Remaining</h3>
-          <div class="value" id="remainingVacation">25</div>
-        </div>
-        <div class="stat-card">
-          <h3>Remaining Special</h3>
-          <div class="value" id="remainingSpecialVacation">5</div>
-        </div>
-        <div class="stat-card">
-          <h3>Previous Period Remaining</h3>
-          <div class="value" id="previousPeriodVacation">0</div>
-        </div>
-        <div class="stat-card">
-          <h3>Previous Special Remaining</h3>
-          <div class="value" id="previousPeriodSpecial">0</div>
+          <h3>Special Days (Feriefridage) Available</h3>
+          <div class="value" id="totalRemainingSpecial">5</div>
         </div>
       </div>
 
       <div class="periods-table">
-        <h2>Vacation Periods & Calculations</h2>
-        <table id="periodsTable">
-          <thead id="periodsTableHead">
-            <!-- Table headers will be generated here -->
-          </thead>
-          <tbody id="periodsTableBody">
-            <!-- Table rows will be generated here -->
-          </tbody>
-        </table>
+        <div style="text-align: center; margin-bottom: 20px">
+          <button
+            id="toggleTableBtn"
+            class="toggle-btn"
+            onclick="togglePeriodsTable()"
+          >
+            <span id="toggleIcon">▼</span> Show Details
+          </button>
+        </div>
+        <div id="tableContainer" style="display: none">
+          <h2>Vacation Periods & Calculations</h2>
+          <table id="periodsTable">
+            <thead id="periodsTableHead">
+              <!-- Table headers will be generated here -->
+            </thead>
+            <tbody id="periodsTableBody">
+              <!-- Table rows will be generated here -->
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div class="controls">
@@ -526,7 +570,7 @@
         constructor() {
           this.currentYear = 2025;
 
-          this.earnedSpecialVacationDaysByYear = {}; // Store special days per year
+          this.earnedSpecialVacationDaysByYear = {}; // Store special days (Feriefridage) per year
           this.endDate = new Date(); // Default to today
           this.vacationDays = new Set();
           this.specialVacationDays = new Set();
@@ -1116,7 +1160,7 @@
             previousRemaining.special + currentSpecialRemaining;
           const specialWarning =
             totalSpecialDays > 5
-              ? `⚠️ Special days cannot exceed 5 days by Dec 31. You must either use ${
+              ? `⚠️ Special days (Feriefridage) cannot exceed 5 days by Dec 31. You must either use ${
                   totalSpecialDays - 5
                 } exceeding days before Dec 31 or they will be paid out in January`
               : "";
@@ -1137,7 +1181,7 @@
               notes: vacationWarning,
             },
             {
-              label: "Special Days",
+              label: "Special Days (Feriefridage)",
               previousEarned: previousSpecialEarned.toString(),
               previousUsed: `${previousSpecialUsed} used (${previousRemaining.special} remaining)`,
               currentEarned: currentSpecialEarned.toString(),
@@ -1210,58 +1254,57 @@
 
           const earnedVacationUntilEndDate = this.calculateEarnedVacationDays();
           const remainingDecimal = earnedVacationUntilEndDate - usedVacation;
-          const remaining = Math.floor(remainingDecimal);
           const remainingSpecial = Math.max(
             0,
             this.getSpecialVacationDaysForYear(this.currentYear) -
               specialVacation
           );
 
-          const wholeDays = Math.floor(earnedVacationUntilEndDate);
-          const decimalPart = (earnedVacationUntilEndDate - wholeDays)
-            .toFixed(2)
-            .substring(1);
-          document.getElementById(
-            "earnedVacation"
-          ).innerHTML = `${wholeDays}<span class="value-decimal">${decimalPart}</span>`;
-          document.getElementById("usedVacation").textContent = usedVacation;
-          document.getElementById("specialVacation").textContent =
-            specialVacation;
-          // Highlight remaining vacation card in red if negative
-          const remainingCard = document
-            .getElementById("remainingVacation")
-            .closest(".stat-card");
-          if (remainingDecimal < 0) {
-            remainingCard.classList.add("negative");
-          } else {
-            remainingCard.classList.remove("negative");
-          }
-
-          // Display remaining vacation as a simple float
-          document.getElementById("remainingVacation").textContent =
-            remainingDecimal.toFixed(2);
-          // Highlight remaining special vacation card in red if negative
-          const remainingSpecialDecimal =
-            this.getSpecialVacationDaysForYear(this.currentYear) -
-            specialVacation;
-          const remainingSpecialCard = document
-            .getElementById("remainingSpecialVacation")
-            .closest(".stat-card");
-          if (remainingSpecialDecimal < 0) {
-            remainingSpecialCard.classList.add("negative");
-          } else {
-            remainingSpecialCard.classList.remove("negative");
-          }
-
-          document.getElementById("remainingSpecialVacation").textContent =
-            remainingSpecialDecimal;
-
-          // Calculate and display previous period remaining days
+          // Calculate previous period remaining
           const previousRemaining = this.calculatePreviousPeriodRemaining();
-          document.getElementById("previousPeriodVacation").textContent =
-            previousRemaining.vacation;
-          document.getElementById("previousPeriodSpecial").textContent =
-            previousRemaining.special;
+          const totalVacationRemaining =
+            previousRemaining.vacation + remainingDecimal;
+          const totalSpecialRemaining =
+            previousRemaining.special + remainingSpecial;
+
+          // Calculate total earned from both periods
+          const previousEarned = 25; // Assume full year for previous period
+          const totalEarnedVacation =
+            previousEarned + earnedVacationUntilEndDate;
+          const previousSpecialEarned = this.getSpecialVacationDaysForYear(
+            this.currentYear - 1
+          );
+          const currentSpecialEarned = this.getSpecialVacationDaysForYear(
+            this.currentYear
+          );
+          const totalSpecialEarned =
+            previousSpecialEarned + currentSpecialEarned;
+
+          // Update simplified cards showing only available days
+          document.getElementById("totalRemainingVacation").textContent =
+            totalVacationRemaining.toFixed(2);
+
+          document.getElementById("totalRemainingSpecial").textContent =
+            totalSpecialRemaining;
+
+          // Highlight cards if negative
+          const vacationCard = document
+            .getElementById("totalRemainingVacation")
+            .closest(".stat-card");
+          if (totalVacationRemaining < 0) {
+            vacationCard.classList.add("negative");
+          } else {
+            vacationCard.classList.remove("negative");
+          }
+
+          const specialCard = document
+            .getElementById("totalRemainingSpecial")
+            .closest(".stat-card");
+          if (totalSpecialRemaining < 0) {
+            specialCard.classList.add("negative");
+          } else {
+            specialCard.classList.remove("negative");
+          }
 
           // Update periods table
           this.updatePeriodsTable();
@@ -1326,6 +1369,19 @@
 
       function openDatePicker() {
         document.getElementById("endDateInput").showPicker();
+      }
+
+      function togglePeriodsTable() {
+        const tableContainer = document.getElementById("tableContainer");
+        const toggleBtn = document.getElementById("toggleTableBtn");
+
+        if (tableContainer.style.display === "none") {
+          tableContainer.style.display = "block";
+          toggleBtn.innerHTML = `<span id="toggleIcon">▲</span> Hide Details`;
+        } else {
+          tableContainer.style.display = "none";
+          toggleBtn.innerHTML = `<span id="toggleIcon">▼</span> Show Details`;
+        }
       }
 
       // Initialize the application
