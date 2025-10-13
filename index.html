@@ -190,6 +190,70 @@
         transform: translateY(0);
       }
 
+      .year-selector-card {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 10px;
+      }
+
+      .year-selector-card .value {
+        min-width: 80px;
+        text-align: center;
+        margin-top: 0;
+      }
+
+      .year-selector-card .year-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 50%;
+        font-size: 1.2em;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .year-selector-card .year-btn:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      .year-selector-card .year-btn:active {
+        transform: scale(0.95);
+      }
+
+      .special-input-card {
+        display: flex;
+        justify-content: center;
+        margin-top: 15px;
+      }
+
+      .special-input-card input {
+        font-size: 2.5em;
+        font-weight: bold;
+        color: inherit;
+        text-align: center;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 15px;
+        width: 80px;
+        background: transparent;
+        transition: all 0.3s ease;
+      }
+
+      .special-input-card input:focus {
+        outline: none;
+        background: rgba(102, 126, 234, 0.1);
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
+      }
+
+      .special-input-card input:hover {
+        background: rgba(102, 126, 234, 0.05);
+      }
+
       .value-decimal {
         font-size: 0.6em;
         opacity: 0.8;
@@ -452,6 +516,15 @@
 
       <div class="stats-panel">
         <div class="stat-card">
+          <h3>Year</h3>
+          <div class="year-selector-card">
+            <button class="year-btn" onclick="changeYear(-1)">◀</button>
+            <span class="value" id="currentYear">2025</span>
+            <button class="year-btn" onclick="changeYear(1)">▶</button>
+          </div>
+        </div>
+
+        <div class="stat-card">
           <h3>Vacation Days Available</h3>
           <div class="value" id="totalRemainingVacation">25</div>
         </div>
@@ -485,15 +558,12 @@
       </div>
 
       <div class="controls">
-        <div class="year-selector">
-          <button class="year-btn" onclick="changeYear(-1)">◀</button>
-          <span class="current-year" id="currentYear">2025</span>
-          <button class="year-btn" onclick="changeYear(1)">▶</button>
-        </div>
-
         <div class="earned-vacation-input">
-          <label for="specialVacationInput" title="Feriefridage"
-            >Special Vacation Days:</label
+          <label
+            for="specialVacationInput"
+            id="specialDaysLabel"
+            title="Feriefridage"
+            >Special days (Feriefridage) allotted for 2025:</label
           >
           <input
             type="number"
@@ -592,6 +662,7 @@
           this.dayNames = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
           this.loadData();
+          this.updateSpecialDaysLabel(); // Ensure label shows correct year
           this.updateSpecialVacationInput(); // Ensure input shows correct year value
           this.initializeEndDate();
           this.calculateBankHolidays();
@@ -1313,11 +1384,18 @@
         changeYear(delta) {
           this.currentYear += delta;
           document.getElementById("currentYear").textContent = this.currentYear;
+          this.updateSpecialDaysLabel(); // Update label with new year
           this.updateSpecialVacationInput(); // Update input for new year
           this.calculateBankHolidays();
           this.generateCalendar();
           this.updateStats(); // Recalculate vacation statistics for new year
           this.saveData();
+        }
+
+        updateSpecialDaysLabel() {
+          document.getElementById(
+            "specialDaysLabel"
+          ).textContent = `Special days (Feriefridage) allotted for ${this.currentYear}:`;
         }
 
         updateEarnedSpecialVacation() {
