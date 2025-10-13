@@ -577,7 +577,7 @@
         </div>
 
         <div class="earned-vacation-input">
-          <label for="endDateInput">Calculate until:</label>
+          <label for="endDateInput">Calculate vacation status until:</label>
           <div class="custom-date-selector">
             <div
               class="date-display"
@@ -591,6 +591,7 @@
               id="endDateInput"
               class="hidden-date-input"
               onchange="updateEndDate()"
+              min=""
             />
             <button
               class="year-btn"
@@ -716,6 +717,11 @@
         }
 
         initializeEndDate() {
+          const today = new Date();
+          
+          // Set minimum date to today
+          document.getElementById("endDateInput").min = today.toISOString().split("T")[0];
+          
           if (!document.getElementById("endDateInput").value) {
             document.getElementById("endDateInput").value = this.endDate
               .toISOString()
@@ -1408,7 +1414,18 @@
 
         updateEndDate() {
           const input = document.getElementById("endDateInput");
-          this.endDate = new Date(input.value);
+          const selectedDate = new Date(input.value);
+          const today = new Date();
+          today.setHours(0, 0, 0, 0); // Reset time to start of day for comparison
+          
+          // Prevent selecting past dates
+          if (selectedDate < today) {
+            input.value = today.toISOString().split("T")[0];
+            this.endDate = today;
+          } else {
+            this.endDate = selectedDate;
+          }
+          
           this.updateDateDisplay();
           this.updateStats();
           this.saveData();
