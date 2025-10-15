@@ -1315,24 +1315,22 @@
             currentVacationRemaining + currentSpecialRemaining;
 
           // Calculate warning messages
+          const excessVacation = previousRemaining.vacation - 5;
           const vacationWarning =
             previousRemaining.vacation > 5
-              ? `⚠️ Only 5 days from the previous period can be transferred to next year. Use ${(
-                  previousRemaining.vacation - 5
-                ).toFixed(
+              ? `⚠️ Only 5 days from the previous period can be transferred to next year. Use ${excessVacation.toFixed(
                   2
-                )} exceeding days before Dec 31, ${currentPeriodYear} to avoid losing them`
+                )} exceeding ${excessVacation === 1 ? 'day' : 'days'} before Dec 31, ${currentPeriodYear} to avoid losing them`
               : "";
 
           const totalSpecialDays =
             previousRemaining.special + currentSpecialRemaining;
+          const excessSpecial = totalSpecialDays - 5;
           const specialWarning =
             totalSpecialDays > 5
-              ? `⚠️ Special days (Feriefridage) cannot exceed 5 days by Dec 31. You must either use ${(
-                  totalSpecialDays - 5
-                ).toFixed(
+              ? `⚠️ Special days (Feriefridage) cannot exceed 5 days by Dec 31. You must either use ${excessSpecial.toFixed(
                   2
-                )} exceeding days before Dec 31 or they will be paid out in January`
+                )} exceeding ${excessSpecial === 1 ? 'day' : 'days'} before Dec 31 or they will be paid out in January`
               : "";
 
           // Create rows with grouped earned/used columns (removed period rows)
