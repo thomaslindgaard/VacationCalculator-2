@@ -666,7 +666,8 @@
           <strong>Instructions:</strong> Left-click to cycle through vacation
           days (full → half → none), Right-click to cycle through special
           vacation days (feriefridage). Half days are shown with diagonal
-          stripes and a ½ symbol. Weekends don't count as vacation days.
+          stripes and a ½ symbol. Weekends and bank holidays cannot be marked as
+          vacation.
         </p>
       </div>
     </div>
@@ -1320,7 +1321,9 @@
             previousRemaining.vacation > 5
               ? `⚠️ Only 5 days from the previous period can be transferred to next year. Use ${excessVacation.toFixed(
                   2
-                )} exceeding ${excessVacation === 1 ? 'day' : 'days'} before Dec 31, ${currentPeriodYear} to avoid losing them`
+                )} exceeding ${
+                  excessVacation === 1 ? "day" : "days"
+                } before Dec 31, ${currentPeriodYear} to avoid losing them`
               : "";
 
           const totalSpecialDays =
@@ -1330,7 +1333,9 @@
             totalSpecialDays > 5
               ? `⚠️ Special days (Feriefridage) cannot exceed 5 days by Dec 31. You must either use ${excessSpecial.toFixed(
                   2
-                )} exceeding ${excessSpecial === 1 ? 'day' : 'days'} before Dec 31 or they will be paid out in January`
+                )} exceeding ${
+                  excessSpecial === 1 ? "day" : "days"
+                } before Dec 31 or they will be paid out in January`
               : "";
 
           // Create rows with grouped earned/used columns (removed period rows)
