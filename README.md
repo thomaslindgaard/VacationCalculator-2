@@ -41,6 +41,18 @@ A comprehensive vacation planning tool designed specifically for Danish employee
 - Customizable end date for vacation calculations
 - Import/export functionality through browser storage
 
+### 🎨 **Dark Theme Support**
+
+- Toggle between light and dark themes with a single click
+- **Monokai color scheme** for dark theme with authentic developer-friendly colors
+- Proper contrast ratios for accessibility and eye comfort
+- Theme preference automatically saved and restored
+- All UI elements adapt seamlessly including:
+  - Calendar days and vacation markers
+  - Input fields and buttons
+  - Tables and summary sections
+  - Legend and instructional text
+
 ## Usage
 
 ### Getting Started
@@ -63,6 +75,15 @@ A comprehensive vacation planning tool designed specifically for Danish employee
 - **Diagonal stripes**: Half days (with ½ symbol)
 - **Orange days**: Danish bank holidays
 - **Blue border**: Today's date
+
+### Theme Toggle
+
+- Click the **🌙 Dark** / **☀️ Light** button in the top-right corner to switch themes
+- Dark theme uses a **Monokai color scheme** with:
+  - Deep charcoal background for reduced eye strain
+  - Cyan accents for interactive elements
+  - High contrast text for excellent readability
+  - Authentic developer color palette
 
 ### Vacation Summary
 
@@ -90,6 +111,9 @@ This calculator implements the Danish vacation system where:
 - **Modern browser support**: Uses ES6+ JavaScript features
 - **Responsive design**: Works on desktop and mobile devices
 - **Local storage**: Data persists between browser sessions
+- **CSS Variables**: Dynamic theming system for light/dark mode switching
+- **Accessibility**: Proper contrast ratios and keyboard navigation support
+- **Monokai Integration**: Authentic developer color scheme for dark theme
 
 ## File Structure
 

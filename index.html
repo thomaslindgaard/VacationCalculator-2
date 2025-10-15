@@ -5,6 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vacation Calculator</title>
     <style>
+      :root {
+        /* Light theme variables */
+        --bg-color: #f5f7fa;
+        --container-bg: white;
+        --text-color: #333;
+        --border-color: #e1e5e9;
+        --card-bg: white;
+        --card-shadow: rgba(0, 0, 0, 0.1);
+        --button-bg: #667eea;
+        --button-hover: #5a6fd8;
+        --input-bg: white;
+        --input-border: #ddd;
+        --calendar-bg: white;
+        --day-bg: #f8f9fa;
+        --day-hover: #e9ecef;
+        --today-border: #667eea;
+      }
+
+      [data-theme="dark"] {
+        /* Monokai Dark theme variables */
+        --bg-color: #272822;
+        --container-bg: #3e3d32;
+        --text-color: #f8f8f2;
+        --border-color: #49483e;
+        --card-bg: #2d2e27;
+        --card-shadow: rgba(0, 0, 0, 0.5);
+        --button-bg: #66d9ef;
+        --button-hover: #4fc3f7;
+        --input-bg: #3e3d32;
+        --input-border: #75715e;
+        --calendar-bg: #2d2e27;
+        --day-bg: #3e3d32;
+        --day-hover: #49483e;
+        --today-border: #66d9ef;
+      }
+
       * {
         margin: 0;
         padding: 0;
@@ -13,26 +49,67 @@
 
       body {
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: var(--bg-color);
+        color: var(--text-color);
         min-height: 100vh;
         padding: 20px;
+        transition: background-color 0.3s ease, color 0.3s ease;
       }
 
       .container {
         max-width: 1400px;
         margin: 0 auto;
-        background: rgba(255, 255, 255, 0.95);
+        background: var(--container-bg);
         border-radius: 15px;
         padding: 30px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 20px 40px var(--card-shadow);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+      }
+
+      .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
       }
 
       h1 {
-        text-align: center;
-        color: #333;
-        margin-bottom: 30px;
+        color: var(--text-color);
         font-size: 2.5em;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        text-shadow: 2px 2px 4px var(--card-shadow);
+        flex-grow: 1;
+        text-align: center;
+        margin: 0;
+      }
+
+      .theme-toggle {
+        background: var(--button-bg);
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .theme-toggle:hover {
+        background: var(--button-hover);
+        transform: translateY(-2px);
+      }
+
+      [data-theme="dark"] .theme-toggle {
+        background: #75715e;
+        color: #f8f8f2;
+      }
+
+      [data-theme="dark"] .theme-toggle:hover {
+        background: #66d9ef;
+        color: #272822;
       }
 
       .stats-panel {
@@ -72,11 +149,12 @@
       }
 
       .periods-table {
-        background: white;
+        background: var(--card-bg);
         border-radius: 10px;
         margin: 30px auto;
         padding: 30px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 8px var(--card-shadow);
+        border: 1px solid var(--border-color);
         max-width: 100%;
         width: fit-content;
         min-width: 1000px;
@@ -84,7 +162,7 @@
 
       .periods-table h2 {
         text-align: center;
-        color: #333;
+        color: var(--text-color);
         margin-bottom: 25px;
         font-size: 1.5em;
       }
@@ -94,13 +172,18 @@
         border-collapse: collapse;
         font-size: 0.95em;
         margin: 0 auto;
+        background: var(--card-bg);
+        color: var(--text-color);
+        border-radius: 10px;
+        overflow: hidden;
       }
 
       .periods-table th,
       .periods-table td {
         padding: 16px 20px;
         text-align: left;
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-color);
       }
 
       .periods-table th {
@@ -109,8 +192,17 @@
         font-weight: bold;
       }
 
+      [data-theme="dark"] .periods-table th {
+        background: #49483e;
+        color: #f8f8f2;
+      }
+
       .periods-table tr:hover {
         background-color: #f8f9fa;
+      }
+
+      [data-theme="dark"] .periods-table tr:hover {
+        background-color: #49483e;
       }
 
       .periods-table .number {
@@ -120,6 +212,62 @@
 
       .periods-table .current-period {
         background-color: #e3f2fd;
+      }
+
+      [data-theme="dark"] .periods-table .current-period {
+        background-color: #49483e;
+      }
+
+      .total-remaining-cell {
+        background-color: #e8f4fd !important;
+        font-weight: bold !important;
+      }
+
+      [data-theme="dark"] .total-remaining-cell {
+        background-color: #49483e !important;
+        color: #66d9ef !important;
+        font-weight: bold !important;
+      }
+
+      .vacation-legend {
+        background-color: #ff6b6b;
+      }
+
+      [data-theme="dark"] .vacation-legend {
+        background-color: #f92672;
+      }
+
+      .special-vacation-legend {
+        background-color: #4ecdc4;
+      }
+
+      [data-theme="dark"] .special-vacation-legend {
+        background-color: #66d9ef;
+      }
+
+      .weekend-legend {
+        background-color: #f0f0f0;
+      }
+
+      [data-theme="dark"] .weekend-legend {
+        background-color: #49483e;
+      }
+
+      .bank-holiday-legend {
+        background-color: #ffa726;
+      }
+
+      [data-theme="dark"] .bank-holiday-legend {
+        background-color: #fd971f;
+      }
+
+      .table-notes {
+        font-size: 0.9em;
+        color: #d9534f;
+      }
+
+      [data-theme="dark"] .table-notes {
+        color: #f92672;
       }
 
       .stat-card:hover {
@@ -234,24 +382,33 @@
       .special-input-card input {
         font-size: 2.5em;
         font-weight: bold;
-        color: inherit;
+        color: var(--text-color);
         text-align: center;
-        border: none;
+        border: 2px solid var(--input-border);
         border-radius: 10px;
         padding: 10px 15px;
         width: 80px;
-        background: transparent;
+        background: var(--input-bg);
         transition: all 0.3s ease;
       }
 
       .special-input-card input:focus {
         outline: none;
-        background: rgba(102, 126, 234, 0.1);
+        border-color: var(--button-bg);
         box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3);
       }
 
       .special-input-card input:hover {
-        background: rgba(102, 126, 234, 0.05);
+        border-color: var(--button-bg);
+      }
+
+      [data-theme="dark"] .special-input-card input:focus {
+        border-color: #66d9ef;
+        box-shadow: 0 0 0 2px rgba(102, 217, 239, 0.3);
+      }
+
+      [data-theme="dark"] .special-input-card input:hover {
+        border-color: #66d9ef;
       }
 
       .value-decimal {
@@ -293,7 +450,7 @@
       .current-year {
         font-size: 1.5em;
         font-weight: bold;
-        color: #333;
+        color: var(--text-color);
         min-width: 80px;
         text-align: center;
       }
@@ -306,15 +463,35 @@
 
       .earned-vacation-input label {
         font-weight: bold;
-        color: #333;
+        color: var(--text-color);
       }
 
       .earned-vacation-input input {
         padding: 8px 12px;
-        border: 2px solid #ddd;
+        border: 2px solid var(--input-border);
         border-radius: 5px;
         font-size: 1em;
         width: 80px;
+        background: var(--input-bg);
+        color: var(--text-color);
+        transition: border-color 0.3s ease;
+      }
+
+      .earned-vacation-input input:focus {
+        outline: none;
+        border-color: var(--button-bg);
+      }
+
+      .earned-vacation-input input:hover {
+        border-color: var(--button-bg);
+      }
+
+      [data-theme="dark"] .earned-vacation-input input:focus {
+        border-color: #66d9ef;
+      }
+
+      [data-theme="dark"] .earned-vacation-input input:hover {
+        border-color: #66d9ef;
       }
 
       .custom-date-selector {
@@ -324,19 +501,24 @@
       }
 
       .date-display {
-        background: white;
-        border: 2px solid #ddd;
+        background: var(--input-bg);
+        border: 2px solid var(--input-border);
         border-radius: 5px;
         padding: 8px 12px;
         font-size: 1em;
         min-width: 80px;
         text-align: center;
         cursor: pointer;
+        color: var(--text-color);
         transition: border-color 0.3s ease;
       }
 
       .date-display:hover {
         border-color: #667eea;
+      }
+
+      [data-theme="dark"] .date-display:hover {
+        border-color: #66d9ef;
       }
 
       .hidden-date-input {
@@ -364,7 +546,7 @@
         width: 20px;
         height: 20px;
         border-radius: 3px;
-        border: 2px solid #333;
+        border: 2px solid var(--text-color);
       }
 
       .calendar-grid {
@@ -375,10 +557,11 @@
       }
 
       .month {
-        background: white;
+        background: var(--card-bg);
         border-radius: 10px;
         padding: 20px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 8px var(--card-shadow);
+        border: 1px solid var(--border-color);
         transition: transform 0.3s ease;
       }
 
@@ -390,10 +573,10 @@
         text-align: center;
         font-size: 1.3em;
         font-weight: bold;
-        color: #333;
+        color: var(--text-color);
         margin-bottom: 15px;
         padding-bottom: 10px;
-        border-bottom: 2px solid #eee;
+        border-bottom: 2px solid var(--border-color);
       }
 
       .days-header {
@@ -508,6 +691,42 @@
         font-size: 0.7em;
       }
 
+      /* Monokai dark theme specific colors */
+      [data-theme="dark"] .day.vacation {
+        background-color: #f92672;
+        color: #f8f8f2;
+      }
+
+      [data-theme="dark"] .day.vacation-half {
+        background: linear-gradient(45deg, #f92672 50%, #49483e 50%);
+        color: #f8f8f2;
+      }
+
+      [data-theme="dark"] .day.vacation-half::after {
+        color: #f92672;
+        text-shadow: 1px 1px 1px #272822;
+      }
+
+      [data-theme="dark"] .day.special-vacation {
+        background-color: #66d9ef;
+        color: #272822;
+      }
+
+      [data-theme="dark"] .day.special-vacation-half {
+        background: linear-gradient(45deg, #66d9ef 50%, #49483e 50%);
+        color: #f8f8f2;
+      }
+
+      [data-theme="dark"] .day.special-vacation-half::after {
+        color: #66d9ef;
+        text-shadow: 1px 1px 1px #272822;
+      }
+
+      [data-theme="dark"] .day.bank-holiday {
+        background-color: #fd971f;
+        color: #272822;
+      }
+
       .day.today {
         border: 2px solid #667eea;
         font-weight: bold;
@@ -516,8 +735,9 @@
       .instructions {
         text-align: center;
         margin-top: 20px;
-        color: #666;
+        color: #667eea;
         font-style: italic;
+        font-weight: 500;
       }
 
       .message-area {
@@ -581,6 +801,74 @@
         opacity: 0.6;
       }
 
+      /* Monokai dark theme text and label overrides */
+      [data-theme="dark"] label,
+      [data-theme="dark"] .month-name,
+      [data-theme="dark"] .day-name,
+      [data-theme="dark"] h2,
+      [data-theme="dark"] h3,
+      [data-theme="dark"] .stat-card h3 {
+        color: #f8f8f2 !important;
+      }
+
+      [data-theme="dark"] .instructions {
+        color: #ae81ff !important;
+      }
+
+      /* Dark theme toggle button styling */
+      [data-theme="dark"] .theme-toggle {
+        background: #75715e;
+        color: #f8f8f2;
+      }
+
+      [data-theme="dark"] .theme-toggle:hover {
+        background: #66d9ef;
+        color: #272822;
+      }
+
+      /* Dark theme table row hover */
+      [data-theme="dark"] .periods-table tr:hover {
+        background-color: #49483e;
+      }
+
+      /* Monokai dark theme warning content */
+      [data-theme="dark"] .warning-content {
+        background: var(--card-bg);
+        color: #f8f8f2;
+        border-left: 4px solid #66d9ef;
+        box-shadow: 0 4px 16px var(--card-shadow);
+        border: 1px solid var(--border-color);
+      }
+
+      [data-theme="dark"] .warning-content::after {
+        content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80" width="120" height="80"><g opacity="0.6"><circle cx="20" cy="20" r="12" fill="%23fd971f"/><path d="M15 15 L25 15 L25 25 L15 25 Z" fill="none" stroke="%23fd971f" stroke-width="1"/><rect x="70" y="60" width="40" height="15" rx="2" fill="%23f8f8f2"/><circle cx="75" cy="55" r="3" fill="%23f8f8f2"/><circle cx="85" cy="58" r="2" fill="%23f8f8f2"/><circle cx="95" cy="56" r="2.5" fill="%23f8f8f2"/><circle cx="105" cy="59" r="2" fill="%23f8f8f2"/><path d="M40 45 L40 65 M35 50 Q40 45 45 50 M37 53 Q40 50 43 53 M38 56 Q40 53 42 56" stroke="%23f8f8f2" stroke-width="2" fill="none"/><path d="M10 70 Q30 65 50 70 Q70 75 90 70 Q100 68 110 70" stroke="%23f8f8f2" stroke-width="1.5" fill="none"/></g></svg>');
+      }
+
+      /* Dark theme text color overrides for better contrast */
+      [data-theme="dark"] label,
+      [data-theme="dark"] .month-name,
+      [data-theme="dark"] .day-name,
+      [data-theme="dark"] h2,
+      [data-theme="dark"] h3,
+      [data-theme="dark"] .stat-card h3,
+      [data-theme="dark"] .periods-table h2 {
+        color: #f8f8f2 !important;
+      }
+
+      [data-theme="dark"] .instructions {
+        color: #66d9ef !important;
+      }
+
+      [data-theme="dark"] .theme-toggle {
+        background: #75715e;
+        color: #f8f8f2;
+      }
+
+      [data-theme="dark"] .theme-toggle:hover {
+        background: #66d9ef;
+        color: #272822;
+      }
+
       .warning-content h3 {
         margin: 0 0 15px 0;
         font-size: 18px;
@@ -619,7 +907,14 @@
   </head>
   <body>
     <div class="container">
-      <h1>🏖️ Vacation Calculator</h1>
+      <div class="header-container">
+        <div></div>
+        <h1>🏖️ Vacation Calculator</h1>
+        <button class="theme-toggle" onclick="toggleTheme()">
+          <span id="themeIcon">🌙</span>
+          <span id="themeText">Dark</span>
+        </button>
+      </div>
 
       <div class="stats-panel">
         <div class="stat-card">
@@ -721,19 +1016,19 @@
 
       <div class="legend">
         <div class="legend-item">
-          <div class="legend-color" style="background-color: #ff6b6b"></div>
+          <div class="legend-color vacation-legend"></div>
           <span>Vacation Day</span>
         </div>
         <div class="legend-item">
-          <div class="legend-color" style="background-color: #4ecdc4"></div>
+          <div class="legend-color special-vacation-legend"></div>
           <span>Special Vacation (Feriefridage)</span>
         </div>
         <div class="legend-item">
-          <div class="legend-color" style="background-color: #f0f0f0"></div>
+          <div class="legend-color weekend-legend"></div>
           <span>Weekend</span>
         </div>
         <div class="legend-item">
-          <div class="legend-color" style="background-color: #ffa726"></div>
+          <div class="legend-color bank-holiday-legend"></div>
           <span>Bank Holiday 🏛️</span>
         </div>
       </div>
@@ -813,6 +1108,24 @@
           setTimeout(() => {
             messageArea.style.display = "none";
           }, 3000);
+        }
+
+        initializeTheme() {
+          const savedTheme = localStorage.getItem("theme") || "light";
+          document.documentElement.setAttribute("data-theme", savedTheme);
+          this.updateThemeButton(savedTheme);
+        }
+
+        updateThemeButton(theme) {
+          const themeIcon = document.getElementById("themeIcon");
+          const themeText = document.getElementById("themeText");
+          if (theme === "dark") {
+            themeIcon.textContent = "☀️";
+            themeText.textContent = "Light";
+          } else {
+            themeIcon.textContent = "🌙";
+            themeText.textContent = "Dark";
+          }
         }
 
         updateWarningSummary(vacationWarning, specialWarning) {
@@ -1532,7 +1845,7 @@
           rows.forEach((row) => {
             const tr = document.createElement("tr");
             if (row.isTotalRow) {
-              tr.style.borderTop = "2px solid #333";
+              tr.style.borderTop = "2px solid var(--border-color)";
               tr.style.fontWeight = "bold";
               tr.innerHTML = `
                 <td><strong>${row.label}</strong></td>
@@ -1540,8 +1853,8 @@
                 <td class="number">${row.previousUsed}</td>
                 <td class="number current-period"></td>
                 <td class="number current-period">${row.currentUsed}</td>
-                <td class="number" style="background-color: #e8f4fd; font-weight: bold;">${row.totalRemaining}</td>
-                <td class="notes" style="font-size: 0.9em; color: #d9534f;">${row.notes}</td>
+                <td class="number total-remaining-cell">${row.totalRemaining}</td>
+                <td class="notes table-notes">${row.notes}</td>
               `;
             } else {
               tr.innerHTML = `
@@ -1551,7 +1864,7 @@
                 <td class="number current-period">${row.currentEarned}</td>
                 <td class="number current-period">${row.currentUsed}</td>
                 <td class="number">${row.totalRemaining}</td>
-                <td class="notes" style="font-size: 0.9em; color: #d9534f;">${row.notes}</td>
+                <td class="notes table-notes">${row.notes}</td>
               `;
             }
             tableBody.appendChild(tr);
@@ -1758,9 +2071,20 @@
         }
       }
 
+      function toggleTheme() {
+        const currentTheme =
+          document.documentElement.getAttribute("data-theme") || "light";
+        const newTheme = currentTheme === "light" ? "dark" : "light";
+
+        document.documentElement.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+        vacationCalculator.updateThemeButton(newTheme);
+      }
+
       // Initialize the application
       document.addEventListener("DOMContentLoaded", () => {
         vacationCalculator = new VacationCalculator();
+        vacationCalculator.initializeTheme();
       });
 
       // Prevent right-click context menu on the calendar
