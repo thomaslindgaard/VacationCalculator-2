@@ -561,6 +561,24 @@
         border-radius: 12px;
         box-shadow: 0 4px 16px rgba(78, 205, 196, 0.3);
         border-left: 4px solid #26a69a;
+        position: relative;
+        overflow: hidden;
+        text-align: left;
+      }
+
+      .warning-content > div {
+        position: relative;
+        z-index: 2;
+        max-width: calc(100% - 140px);
+      }
+
+      .warning-content::after {
+        content: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 80" width="120" height="80"><g opacity="0.4"><circle cx="20" cy="20" r="12" fill="yellow"/><path d="M15 15 L25 15 L25 25 L15 25 Z" fill="none" stroke="yellow" stroke-width="1"/><rect x="70" y="60" width="40" height="15" rx="2" fill="white"/><circle cx="75" cy="55" r="3" fill="white"/><circle cx="85" cy="58" r="2" fill="white"/><circle cx="95" cy="56" r="2.5" fill="white"/><circle cx="105" cy="59" r="2" fill="white"/><path d="M40 45 L40 65 M35 50 Q40 45 45 50 M37 53 Q40 50 43 53 M38 56 Q40 53 42 56" stroke="white" stroke-width="2" fill="none"/><path d="M10 70 Q30 65 50 70 Q70 75 90 70 Q100 68 110 70" stroke="white" stroke-width="1.5" fill="none"/></g></svg>');
+        position: absolute;
+        top: 50%;
+        right: 15px;
+        transform: translateY(-50%);
+        opacity: 0.6;
       }
 
       .warning-content h3 {
@@ -624,7 +642,7 @@
       </div>
 
       <!-- Warning Summary Section -->
-      <div id="warningSummary" class="warning-summary" style="display: none;">
+      <div id="warningSummary" class="warning-summary" style="display: none">
         <div class="warning-content">
           <h3>🌟 Vacation Days to Enjoy</h3>
           <div id="warningMessages"></div>
@@ -800,18 +818,18 @@
         updateWarningSummary(vacationWarning, specialWarning) {
           const warningSummary = document.getElementById("warningSummary");
           const warningMessages = document.getElementById("warningMessages");
-          
+
           const warnings = [];
           if (vacationWarning) warnings.push(vacationWarning);
           if (specialWarning) warnings.push(specialWarning);
-          
+
           if (warnings.length > 0) {
             // Combine all warnings into a single paragraph
-            const combinedMessage = warnings.join(' ');
+            const combinedMessage = warnings.join(" ");
             warningMessages.innerHTML = `<p>${combinedMessage}</p>`;
-            warningSummary.style.display = 'block';
+            warningSummary.style.display = "block";
           } else {
-            warningSummary.style.display = 'none';
+            warningSummary.style.display = "none";
           }
         }
 
@@ -1614,26 +1632,36 @@
 
           // Calculate summary messages
           const excessVacation = previousRemaining.vacation - 5;
-          const totalSpecialDays =
-            previousRemaining.special + remainingSpecial;
+          const totalSpecialDays = previousRemaining.special + remainingSpecial;
           const excessSpecial = totalSpecialDays - 5;
-          
+
           const messages = [];
           if (excessVacation > 0) {
-            messages.push(`${excessVacation.toFixed(2)} vacation ${excessVacation === 1 ? 'day' : 'days'}`);
+            messages.push(
+              `${excessVacation.toFixed(2)} vacation ${
+                excessVacation === 1 ? "day" : "days"
+              }`
+            );
           }
           if (excessSpecial > 0) {
-            messages.push(`${excessSpecial.toFixed(2)} special ${excessSpecial === 1 ? 'day' : 'days'}`);
+            messages.push(
+              `${excessSpecial.toFixed(2)} special ${
+                excessSpecial === 1 ? "day" : "days"
+              }`
+            );
           }
-          
-          const vacationWarning = messages.length > 0 
-            ? `You have ${messages.join(' and ')} to use before Dec 31, ${this.currentYear}.`
-            : "";
+
+          const vacationWarning =
+            messages.length > 0
+              ? `You have ${messages.join(" and ")} to use before Dec 31, ${
+                  this.currentYear
+                }.`
+              : "";
           const specialWarning = "";
 
           // Update periods table
           this.updatePeriodsTable();
-          
+
           // Update warning summary
           this.updateWarningSummary(vacationWarning, specialWarning);
         }
