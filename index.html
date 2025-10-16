@@ -620,12 +620,14 @@
 
       .day.other-month {
         color: #ccc;
-        cursor: default;
+        cursor: pointer;
+        opacity: 0.6;
       }
 
       .day.other-month:hover {
-        transform: none;
-        box-shadow: none;
+        transform: scale(1.05);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        opacity: 0.8;
       }
 
       .day.weekend {
@@ -1543,45 +1545,46 @@
 
           if (!isCurrentMonth) {
             dayDiv.classList.add("other-month");
-          } else {
-            if (isWeekend) {
-              dayDiv.classList.add("weekend");
-            }
-
-            if (this.vacationDays.has(dateString)) {
-              const vacationValue = this.vacationDays.get(dateString);
-              if (vacationValue === 0.5) {
-                dayDiv.classList.add("vacation-half");
-              } else {
-                dayDiv.classList.add("vacation");
-              }
-            }
-
-            if (this.specialVacationDays.has(dateString)) {
-              const specialValue = this.specialVacationDays.get(dateString);
-              if (specialValue === 0.5) {
-                dayDiv.classList.add("special-vacation-half");
-              } else {
-                dayDiv.classList.add("special-vacation");
-              }
-            }
-
-            if (this.bankHolidays.has(dateString)) {
-              dayDiv.classList.add("bank-holiday");
-              dayDiv.title = this.bankHolidays.get(dateString); // Add tooltip with holiday name
-            }
-
-            if (isToday) {
-              dayDiv.classList.add("today");
-            }
-
-            dayDiv.addEventListener("click", (e) =>
-              this.handleDayClick(e, dateString, isWeekend)
-            );
-            dayDiv.addEventListener("contextmenu", (e) =>
-              this.handleDayRightClick(e, dateString, isWeekend)
-            );
           }
+
+          if (isWeekend) {
+            dayDiv.classList.add("weekend");
+          }
+
+          if (this.vacationDays.has(dateString)) {
+            const vacationValue = this.vacationDays.get(dateString);
+            if (vacationValue === 0.5) {
+              dayDiv.classList.add("vacation-half");
+            } else {
+              dayDiv.classList.add("vacation");
+            }
+          }
+
+          if (this.specialVacationDays.has(dateString)) {
+            const specialValue = this.specialVacationDays.get(dateString);
+            if (specialValue === 0.5) {
+              dayDiv.classList.add("special-vacation-half");
+            } else {
+              dayDiv.classList.add("special-vacation");
+            }
+          }
+
+          if (this.bankHolidays.has(dateString)) {
+            dayDiv.classList.add("bank-holiday");
+            dayDiv.title = this.bankHolidays.get(dateString); // Add tooltip with holiday name
+          }
+
+          if (isToday) {
+            dayDiv.classList.add("today");
+          }
+
+          // Add event listeners to all days (including other month days)
+          dayDiv.addEventListener("click", (e) =>
+            this.handleDayClick(e, dateString, isWeekend)
+          );
+          dayDiv.addEventListener("contextmenu", (e) =>
+            this.handleDayRightClick(e, dateString, isWeekend)
+          );
 
           return dayDiv;
         }
