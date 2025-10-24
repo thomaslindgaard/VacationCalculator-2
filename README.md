@@ -57,7 +57,7 @@ A comprehensive vacation planning tool designed specifically for Danish employee
 
 ### Getting Started
 
-1. Open `index.html` in your web browser
+1. Open `vacationcalculator.html` in your web browser
 2. Set your current year using the year selector
 3. Configure your special vacation days allowance (default: 5 days)
 4. Set your employment end date for accurate calculations
@@ -119,8 +119,8 @@ This calculator implements the Danish vacation system where:
 
 ```
 VacationCalculator/
-├── index.html          # Main application file
-└── README.md          # This documentation
+├── vacationcalculator.html    # Main application file
+└── README.md                  # This documentation
 ```
 
 ## Browser Compatibility
