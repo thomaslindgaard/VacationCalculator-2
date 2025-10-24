@@ -102,6 +102,34 @@
         transform: translateY(-2px);
       }
 
+      .readme-link {
+        background: var(--button-bg);
+        color: white;
+        text-decoration: none;
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .readme-link:hover {
+        background: var(--button-hover);
+        transform: translateY(-2px);
+      }
+
+      [data-theme="dark"] .readme-link {
+        background: #75715e;
+        color: #f8f8f2;
+      }
+
+      [data-theme="dark"] .readme-link:hover {
+        background: #66d9ef;
+        color: #272822;
+      }
+
       [data-theme="dark"] .theme-toggle {
         background: #75715e;
         color: #f8f8f2;
@@ -886,6 +914,154 @@
         font-size: 14px;
       }
 
+      /* Help Modal Styles */
+      .help-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        overflow-y: auto;
+      }
+
+      .help-modal.show {
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .help-modal-content {
+        background: var(--container-bg);
+        border-radius: 15px;
+        padding: 30px;
+        max-width: 900px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 40px var(--card-shadow);
+        border: 1px solid var(--border-color);
+        margin-top: 20px;
+        color: var(--text-color);
+      }
+
+      .help-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        border-bottom: 2px solid var(--border-color);
+        padding-bottom: 15px;
+      }
+
+      .help-modal-title {
+        font-size: 2em;
+        color: var(--text-color);
+        margin: 0;
+      }
+
+      .help-close-btn {
+        background: none;
+        border: none;
+        font-size: 2em;
+        color: var(--text-color);
+        cursor: pointer;
+        padding: 0;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+      }
+
+      .help-close-btn:hover {
+        background: var(--day-hover);
+        transform: scale(1.1);
+      }
+
+      .help-content {
+        line-height: 1.6;
+      }
+
+      .help-content h1 {
+        color: var(--text-color);
+        font-size: 2.2em;
+        margin: 0 0 20px 0;
+        text-shadow: none;
+      }
+
+      .help-content h2 {
+        color: var(--text-color);
+        font-size: 1.6em;
+        margin: 25px 0 15px 0;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 5px;
+      }
+
+      .help-content h3 {
+        color: var(--text-color);
+        font-size: 1.3em;
+        margin: 20px 0 10px 0;
+      }
+
+      .help-content p {
+        margin: 10px 0;
+        color: var(--text-color);
+      }
+
+      .help-content ul,
+      .help-content ol {
+        margin: 10px 0;
+        padding-left: 25px;
+      }
+
+      .help-content li {
+        margin: 5px 0;
+        color: var(--text-color);
+      }
+
+      .help-content code {
+        background: var(--input-bg);
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: "Consolas", "Monaco", monospace;
+        border: 1px solid var(--border-color);
+        color: var(--text-color);
+      }
+
+      .help-content pre {
+        background: var(--input-bg);
+        padding: 15px;
+        border-radius: 8px;
+        overflow-x: auto;
+        border: 1px solid var(--border-color);
+        margin: 15px 0;
+      }
+
+      .help-content pre code {
+        background: none;
+        border: none;
+        padding: 0;
+      }
+
+      .help-content strong {
+        color: var(--text-color);
+        font-weight: bold;
+      }
+
+      .help-content blockquote {
+        border-left: 4px solid var(--button-bg);
+        margin: 15px 0;
+        padding: 10px 20px;
+        background: var(--day-bg);
+        border-radius: 0 8px 8px 0;
+      }
+
       @media (max-width: 768px) {
         .container {
           padding: 15px;
@@ -913,7 +1089,14 @@
   <body>
     <div class="container">
       <div class="header-container">
-        <div></div>
+        <button
+          class="readme-link"
+          onclick="showHelpModal()"
+          title="View Documentation"
+        >
+          <span>📖</span>
+          <span>Help</span>
+        </button>
         <h1>🏖️ Vacation Calculator</h1>
         <button class="theme-toggle" onclick="toggleTheme()">
           <span id="themeIcon">🌙</span>
@@ -1054,6 +1237,25 @@
 
       <!-- Message area for notifications -->
       <div id="messageArea" class="message-area" style="display: none"></div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="help-modal">
+      <div class="help-modal-content">
+        <div class="help-modal-header">
+          <h2 class="help-modal-title">📖 Documentation</h2>
+          <button
+            class="help-close-btn"
+            onclick="hideHelpModal()"
+            title="Close Help"
+          >
+            ×
+          </button>
+        </div>
+        <div id="helpContent" class="help-content">
+          <!-- README content will be loaded here -->
+        </div>
+      </div>
     </div>
 
     <script>
@@ -2087,6 +2289,90 @@
         vacationCalculator.updateThemeButton(newTheme);
       }
 
+      function showHelpModal() {
+        const modal = document.getElementById("helpModal");
+        const content = document.getElementById("helpContent");
+
+        // Load README content
+        content.innerHTML = getReadmeContent();
+
+        modal.classList.add("show");
+        document.body.style.overflow = "hidden"; // Prevent background scrolling
+      }
+
+      function hideHelpModal() {
+        const modal = document.getElementById("helpModal");
+        modal.classList.remove("show");
+        document.body.style.overflow = ""; // Restore scrolling
+      }
+
+      function getReadmeContent() {
+        return `
+          <h1>🇩🇰 Danish Vacation Calculator</h1>
+          
+          <p>A comprehensive vacation planning tool designed specifically for Danish employees to track and manage their vacation days according to Danish labor law (Ferieloven).</p>
+
+          <h2>🗓️ Interactive Calendar</h2>
+          <ul>
+            <li>Click to mark vacation days (full day, half day, or none)</li>
+            <li>Right-click to mark special vacation days (Feriefridage)</li>
+            <li>Visual indicators for weekends, bank holidays, and different vacation types</li>
+            <li>Monday-first calendar layout following European standards</li>
+          </ul>
+
+          <h2>🇩🇰 Danish Labor Law Compliance</h2>
+          <ul>
+            <li>Accurate calculation of 2.0833 vacation days per month worked</li>
+            <li>Danish vacation periods: September 1 - August 31 (earning period)</li>
+            <li>Usage period: September 1 - December 31 of following year</li>
+            <li>Automatic Danish bank holiday detection with Easter calculations</li>
+            <li>Special vacation days (Feriefridage) tracking</li>
+          </ul>
+
+          <h2>📊 Comprehensive Tracking</h2>
+          <ul>
+            <li><strong>Half-day support</strong>: Book 0.5 or 1.0 vacation days for flexible planning</li>
+            <li><strong>Period-based calculations</strong>: Separate tracking for current and previous vacation periods</li>
+            <li><strong>Carryover rules</strong>: Only 5 vacation days can be transferred to next year</li>
+            <li><strong>Smart validation</strong>: Prevents exceeding special day allowances</li>
+            <li><strong>Real-time statistics</strong>: Shows remaining vacation and special days</li>
+          </ul>
+
+          <h3>Marking Vacation Days</h3>
+          <ul>
+            <li><strong>Left-click</strong> any weekday to cycle through: None → Full Day → Half Day → None</li>
+            <li><strong>Right-click</strong> any weekday to cycle through special days: None → Full Special → Half Special → None</li>
+            <li>Weekends and bank holidays cannot be marked as vacation days</li>
+          </ul>
+
+          <h3>Understanding the Display</h3>
+          <ul>
+            <li><strong>Red days</strong>: Regular vacation days</li>
+            <li><strong>Teal days</strong>: Special vacation days (Feriefridage)</li>
+            <li><strong>Diagonal stripes</strong>: Half days (with ½ symbol)</li>
+            <li><strong>Orange days</strong>: Danish bank holidays</li>
+            <li><strong>Blue border</strong>: Today's date</li>
+          </ul>
+
+          <h2>🎨 Dark Theme Support</h2>
+          <p>Toggle between light and dark themes with the button in the top-right corner. Dark theme uses a <strong>Monokai color scheme</strong> with deep charcoal background for reduced eye strain and high contrast text for excellent readability.</p>
+
+          <h2>🇩🇰 Danish Vacation Law Context</h2>
+          <p>This calculator implements the Danish vacation system where:</p>
+          <ul>
+            <li>Employees earn 2.0833 vacation days per month (25 days per year)</li>
+            <li>Vacation is earned from September 1 to August 31</li>
+            <li>Earned vacation can be used from September 1 to December 31 of the following year</li>
+            <li>Maximum 5 vacation days can be carried over to the next vacation year</li>
+            <li>Special vacation days (Feriefridage) are additional days that cannot exceed 5 total</li>
+            <li>Unused excess days are typically paid out rather than carried forward</li>
+          </ul>
+
+          <h2>💾 Data Persistence</h2>
+          <p>Your vacation data is automatically saved to your browser's local storage and persists between sessions. This includes your marked vacation days, special days, and theme preferences.</p>
+        `;
+      }
+
       // Initialize the application
       document.addEventListener("DOMContentLoaded", () => {
         vacationCalculator = new VacationCalculator();
@@ -2097,6 +2383,24 @@
       document.addEventListener("contextmenu", (e) => {
         if (e.target.classList.contains("day")) {
           e.preventDefault();
+        }
+      });
+
+      // Close help modal when clicking outside
+      document.addEventListener("click", (e) => {
+        const modal = document.getElementById("helpModal");
+        if (e.target === modal) {
+          hideHelpModal();
+        }
+      });
+
+      // Close help modal with Escape key
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          const modal = document.getElementById("helpModal");
+          if (modal.classList.contains("show")) {
+            hideHelpModal();
+          }
         }
       });
     </script>
